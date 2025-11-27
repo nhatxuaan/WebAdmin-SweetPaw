@@ -19,6 +19,7 @@ export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const ProductEditPage = lazy(() => import('src/pages/product-detail'));
+export const UserEditPage = lazy(() => import('src/pages/user-detail'));
 const renderFallback = () => (
   <Box
     sx={{
@@ -51,7 +52,14 @@ export const routesSection: RouteObject[] = [
     ),
     children: [
       { index: true, element: <DashboardPage /> },
-      { path: 'user', element: <UserPage /> },
+      { 
+        path: 'user', 
+        children: [
+          { index: true, element: <UserPage /> },
+          { path: ':id/edit', element: <UserEditPage /> },
+        ]
+    },
+
       { path: 'blog', element: <BlogPage /> },
       {
         path: 'products', // Đường dẫn cha: /products

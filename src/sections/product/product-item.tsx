@@ -15,7 +15,7 @@ export type ProductItemProps = {
   name: string;
   price: number;
   coverUrl: string;
-  ratingAverage: number;
+  ratingAverage?: number;
   // Thêm optional fields để tránh lỗi type
   priceSale?: number | null;
   colors?: string[];

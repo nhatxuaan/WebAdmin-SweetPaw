@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom'; // ← THÊM DÒNG NÀY
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -27,6 +28,7 @@ import type { UserProps } from '../user-table-row';
 // ----------------------------------------------------------------------
 
 export function UserView() {
+  const navigate = useNavigate();
   const table = useTable();
 
   const [filterName, setFilterName] = useState('');
@@ -38,6 +40,12 @@ export function UserView() {
   });
 
   const notFound = !dataFiltered.length && !!filterName;
+   
+  // Xử lý khi click "Thêm khách hàng mới"
+
+  const handleAddCustomer = useCallback(() => {
+    navigate('/user/new/edit');
+  }, [navigate]);
 
   return (
     <DashboardContent>
@@ -55,6 +63,7 @@ export function UserView() {
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          onClick={handleAddCustomer} 
         >
           Thêm khách hàng mới
         </Button>
@@ -137,6 +146,7 @@ export function UserView() {
 // ----------------------------------------------------------------------
 
 export function useTable() {
+  const navigate = useNavigate(); // ← THÊM DÒNG NÀY
   const [page, setPage] = useState(0);
   const [orderBy, setOrderBy] = useState('name');
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -179,12 +189,16 @@ export function useTable() {
     setPage(newPage);
   }, []);
 
+
+
   const onChangeRowsPerPage = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       setRowsPerPage(parseInt(event.target.value, 10));
       onResetPage();
     },
     [onResetPage]
+
+
   );
 
   return {
