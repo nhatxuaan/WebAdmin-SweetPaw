@@ -130,7 +130,7 @@ const handleDeleteProduct = useCallback(async () => {
         <Link
           underline="hover"
           color="inherit"
-          onClick={() => navigate('/products')}
+          onClick={() => navigate('/sweetpaw/products')}
           sx={{ cursor: 'pointer' }}
         >
           Sản phẩm

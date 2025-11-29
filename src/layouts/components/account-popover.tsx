@@ -132,7 +132,7 @@ export function AccountPopover({ data = [], sx, ...other }: AccountPopoverProps)
           <Button fullWidth color="error" size="medium" variant="text"
           onClick={() => {
           // XÓA TOKEN NẾU CÓ
-          //localStorage.removeItem("adminToken");
+          localStorage.removeItem("adminToken");
 
           // ĐÓNG POPOVER
           handleClosePopover();

@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // ← THÊM DÒNG NÀY
+import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useEffect, ChangeEvent, MouseEvent } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { _users } from 'src/_mock';
+import { apiGetAuth } from 'src/services/apiClient';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
@@ -23,25 +23,51 @@ import { TableEmptyRows } from '../table-empty-rows';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
-import type { UserProps } from '../user-table-row';
-
-// ----------------------------------------------------------------------
+// ----------------------
+// ⭐ DEFINE CUSTOMER TYPE
+// ----------------------
+interface Customer {
+  _id: string;
+  HoTen: string;
+  Email: string;
+  SoDienThoai?: string;
+  DiaChi?: any[];
+}
 
 export function UserView() {
   const navigate = useNavigate();
   const table = useTable();
 
   const [filterName, setFilterName] = useState('');
+  const [customers, setCustomers] = useState<Customer[]>([]);
 
-  const dataFiltered: UserProps[] = applyFilter({
-    inputData: _users,
+  // -----------------------------
+  //  GET DATA FROM BACKEND
+  // -----------------------------
+  useEffect(() => {
+    async function fetchCustomers() {
+      try {
+        const data = await apiGetAuth('/api/admin/customers');
+        console.log('Customers API:', data);
+        setCustomers(data);
+      } catch (err) {
+        console.error('Load customers failed:', err);
+      }
+    }
+
+    fetchCustomers();
+  }, []);
+
+  // -----------------------------
+  // FILTER DATA
+  // -----------------------------
+  const dataFiltered = applyFilter({
+    inputData: customers,
     comparator: getComparator(table.order, table.orderBy),
     filterName,
   });
 
   const notFound = !dataFiltered.length && !!filterName;
-   
-  // Xử lý khi click "Thêm khách hàng mới"
 
   const handleAddCustomer = useCallback(() => {
     navigate('/sweetpaw/user/new/edit');
@@ -59,11 +85,12 @@ export function UserView() {
         <Typography variant="h4" sx={{ flexGrow: 1 }}>
           Khách hàng
         </Typography>
+
         <Button
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={handleAddCustomer} 
+          onClick={handleAddCustomer}
         >
           Thêm khách hàng mới
         </Button>
@@ -73,7 +100,7 @@ export function UserView() {
         <UserTableToolbar
           numSelected={table.selected.length}
           filterName={filterName}
-          onFilterName={(event: React.ChangeEvent<HTMLInputElement>) => {
+          onFilterName={(event) => {
             setFilterName(event.target.value);
             table.onResetPage();
           }}
@@ -82,27 +109,31 @@ export function UserView() {
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
             <Table sx={{ minWidth: 800 }}>
+
               <UserTableHead
                 order={table.order}
                 orderBy={table.orderBy}
-                rowCount={_users.length}
+                rowCount={customers.length}
                 numSelected={table.selected.length}
                 onSort={table.onSort}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    _users.map((user) => user.id)
+                    customers
+                      .filter((u) => u && u._id)
+                      .map((u) => u._id)
                   )
                 }
                 headLabel={[
-                  { id: 'name', label: 'Họ tên khách', width: 180, minWidth: 160 },
-                  { id: 'email', label: 'Email', width: 200, minWidth: 180 },
-                  { id: 'phoneNumber', label: 'Số điện thoại', width: 140, minWidth: 120 },
-                  { id: 'address', label: 'Địa chỉ', width: 200, minWidth: 160 },
-                  { id: 'totalSpent', label: 'Tổng chi', align: 'right', width: 120, minWidth: 100 },
-                  { id: '', width: 60, minWidth: 50 },
+                  { id: 'HoTen', label: 'Họ tên khách' },
+                  { id: 'Email', label: 'Email' },
+                  { id: 'SoDienThoai', label: 'Số điện thoại' },
+                  { id: 'DiaChi', label: 'Địa chỉ' },
+                  { id: 'totalSpent', label: 'Tổng chi', align: 'right' },
+                  { id: '', width: 60 },
                 ]}
               />
+
               <TableBody>
                 {dataFiltered
                   .slice(
@@ -111,20 +142,21 @@ export function UserView() {
                   )
                   .map((row) => (
                     <UserTableRow
-                      key={row.id}
+                      key={row._id}
                       row={row}
-                      selected={table.selected.includes(row.id)}
-                      onSelectRow={() => table.onSelectRow(row.id)}
+                      selected={table.selected.includes(row._id)}
+                      onSelectRow={() => table.onSelectRow(row._id)}
                     />
                   ))}
 
                 <TableEmptyRows
                   height={68}
-                  emptyRows={emptyRows(table.page, table.rowsPerPage, _users.length)}
+                  emptyRows={emptyRows(table.page, table.rowsPerPage, customers.length)}
                 />
 
                 {notFound && <TableNoData searchQuery={filterName} />}
               </TableBody>
+
             </Table>
           </TableContainer>
         </Scrollbar>
@@ -132,7 +164,7 @@ export function UserView() {
         <TablePagination
           component="div"
           page={table.page}
-          count={_users.length}
+          count={customers.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}
@@ -143,12 +175,12 @@ export function UserView() {
   );
 }
 
-// ----------------------------------------------------------------------
-
+// ------------------------------
+// TABLE HOOK (KHÔNG ĐỤNG ĐẾN _users NỮA)
+// ------------------------------
 export function useTable() {
-  const navigate = useNavigate(); // ← THÊM DÒNG NÀY
   const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState('name');
+  const [orderBy, setOrderBy] = useState('HoTen'); // default sort
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selected, setSelected] = useState<string[]>([]);
   const [order, setOrder] = useState<'asc' | 'desc'>('asc');
@@ -163,11 +195,7 @@ export function useTable() {
   );
 
   const onSelectAllRows = useCallback((checked: boolean, newSelecteds: string[]) => {
-    if (checked) {
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
+    setSelected(checked ? newSelecteds : []);
   }, []);
 
   const onSelectRow = useCallback(
@@ -175,31 +203,28 @@ export function useTable() {
       const newSelected = selected.includes(inputValue)
         ? selected.filter((value) => value !== inputValue)
         : [...selected, inputValue];
-
       setSelected(newSelected);
     },
     [selected]
   );
 
-  const onResetPage = useCallback(() => {
-    setPage(0);
-  }, []);
+  const onResetPage = useCallback(() => setPage(0), []);
 
-  const onChangePage = useCallback((event: unknown, newPage: number) => {
+  const onChangePage = useCallback(
+  (event: MouseEvent<HTMLButtonElement> | null, newPage: number) => {
     setPage(newPage);
-  }, []);
-
+  },
+  []
+);
 
 
   const onChangeRowsPerPage = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRowsPerPage(parseInt(event.target.value, 10));
-      onResetPage();
-    },
-    [onResetPage]
-
-
-  );
+  (event: ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    onResetPage();
+  },
+  [onResetPage]
+);
 
   return {
     page,

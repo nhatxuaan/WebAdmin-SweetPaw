@@ -11,7 +11,12 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { useRouter } from 'src/routes/hooks';
 
+import { apiPost } from "src/services/apiClient";
+
 import { Iconify } from 'src/components/iconify';
+
+
+
 
 // ----------------------------------------------------------------------
 
@@ -19,13 +24,40 @@ export function SignInView() {
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
 
   //Xử lý đăng nhập
-  const handleSignIn = useCallback(() => {
+  // const handleSignIn = useCallback(() => {
 
-    //localStorage.setItem("adminToken", "fake-token");
-    router.push("/sweetpaw");
-  }, [router]);
+  //   //localStorage.setItem("adminToken", "fake-token");
+  //   router.push("/sweetpaw");
+  // }, [router]);
+
+  const handleSignIn = useCallback(async () => {
+    console.log("Email:", email);
+    console.log("Password:", password);
+  try {
+    const data = await apiPost("/api/admin/login", {
+      email,
+      password,
+    });
+
+    console.log("Login response:", data);
+
+    if (data.Boolean === true) {
+      localStorage.setItem("adminToken", data.token);
+      router.push("/sweetpaw");
+    } else {
+      alert("Sai email hoặc mật khẩu!");
+    }
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert("Server lỗi");
+  }
+}, [email, password, router]);
+
 
   const renderForm = (
     <Box
@@ -35,7 +67,7 @@ export function SignInView() {
         flexDirection: 'column',
       }}
     >
-      <TextField
+      {/* <TextField
         fullWidth
         name="email"
         label="Email address"
@@ -44,13 +76,20 @@ export function SignInView() {
         slotProps={{
           inputLabel: { shrink: true },
         }}
+      /> */}
+      <TextField
+        fullWidth
+        label="Email address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        sx={{ mb: 3 }}
       />
 
       <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
         Forgot password?
       </Link>
 
-      <TextField
+      {/* <TextField
         fullWidth
         name="password"
         label="Password"
@@ -69,6 +108,26 @@ export function SignInView() {
           },
         }}
         sx={{ mb: 3 }}
+      /> */}
+
+      <TextField
+        fullWidth
+        label="Password"
+        type={showPassword ? "text" : "password"}
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        sx={{ mb: 3 }}
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                  <Iconify icon={showPassword ? "solar:eye-bold" : "solar:eye-closed-bold"} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
+      }}
       />
 
       <Button
@@ -139,7 +198,7 @@ export function SignInView() {
             textTransform: 'none',
           }}
         >
-        Đăng ký với Google
+        Đăng nhập với Google
         </Button>
         
         {/* <IconButton color="inherit">
