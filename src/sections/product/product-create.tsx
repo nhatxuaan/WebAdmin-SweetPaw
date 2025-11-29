@@ -31,6 +31,7 @@ export default function ProductEditView() {
   const { id } = useParams();
   const navigate = useNavigate();
 
+
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -97,31 +98,6 @@ export default function ProductEditView() {
     }
   };
 
-  // Thêm vào trong ProductEditView.tsx
-const handleDeleteProduct = useCallback(async () => {
-
-    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')) {
-        try {
-            setLoading(true);
-            // BƯỚC QUAN TRỌNG: GỌI API XÓA
-            // await api.delete(`/products/${id}`); 
-            
-            // Ví dụ delay để mô phỏng API call
-            await new Promise(resolve => setTimeout(resolve, 500)); 
-
-            alert('Sản phẩm đã được xóa thành công!');
-            
-            // Điều hướng về trang danh sách sản phẩm
-            navigate('/sweetpaw/products'); 
-
-        } catch (error) {
-            console.error("Lỗi khi xóa sản phẩm:", error);
-            alert('Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại.');
-        } finally {
-            setLoading(false);
-        }
-    }
-}, [id, navigate, setLoading]); // Đảm bảo các dependencies cần thiết
 
   return (
     <DashboardContent>
@@ -136,14 +112,14 @@ const handleDeleteProduct = useCallback(async () => {
           Sản phẩm
         </Link>
         <Typography color="text.primary">
-          Chỉnh sửa
+           Thêm mới
         </Typography>
       </Breadcrumbs>
 
       {/* Header */}
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
         <Typography variant="h4">
-         Chỉnh sửa sản phẩm
+         Thêm sản phẩm mới
         </Typography>
         <Button
           variant="text"
@@ -284,25 +260,13 @@ const handleDeleteProduct = useCallback(async () => {
 
                 {/* Buttons */}
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
-
-                        <Button
-                            variant="outlined"
-                            color="error" // Màu đỏ, tượng trưng cho hành động nguy hiểm
-                            onClick={handleDeleteProduct} 
-                            disabled={loading}
-                            sx={{ mr: 'auto' }} // Đẩy nút này về phía trái
-                        >
-                            Xóa sản phẩm
-                        </Button>
-
-
                   <Button
                     type="submit"
                     variant="contained"
                     disabled={loading}
                     //startIcon={loading ? <Iconify icon="eos-icons:loading" /> : null}
                   >
-                    {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                    {loading ? 'Đang lưu...' : 'Tạo mới'}
                   </Button>
                 </Stack>
               </Stack>

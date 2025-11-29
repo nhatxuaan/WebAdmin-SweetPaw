@@ -34,6 +34,11 @@ export const navData = [
     // ),
   },
   {
+    title: 'Đơn hàng',
+    path: '/sweetpaw/order',
+    icon: icon('ic-order'),
+  },
+  {
     title: 'Tin nhắn',
     path: '/sweetpaw/blog',
     icon: icon('ic-blog'),

@@ -23,6 +23,8 @@ export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export const ProductEditPage = lazy(() => import('src/pages/product-detail'));
 export const UserEditPage = lazy(() => import('src/pages/user-detail'));
+export const OrderPage = lazy(() => import('src/pages/order'));
+export const ProductCreatePage = lazy(() => import('src/sections/product/product-create'));
 const renderFallback = () => (
   <Box
     sx={{
@@ -70,6 +72,10 @@ export const routesSection: RouteObject[] = [
       },
 
       { path: 'blog', element: <BlogPage /> },
+
+      // Trang Đơn hàng
+      { path: 'order', element: <OrderPage /> },
+      
       {
         path: 'products', // Đường dẫn cha: /products
         children: [
@@ -77,6 +83,7 @@ export const routesSection: RouteObject[] = [
           { index: true, element: <ProductsPage /> },
           // Route con: /products/:id/edit (Hiển thị trang chỉnh sửa sản phẩm)
           { path: ':id/edit', element: <ProductEditPage /> },
+          { path: 'new/edit', element: <ProductCreatePage /> },
         ],
       },
     ],
