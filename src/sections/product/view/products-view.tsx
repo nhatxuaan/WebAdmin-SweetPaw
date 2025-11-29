@@ -1,6 +1,8 @@
 // src/sections/product/view/products-view.tsx
-import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // ← THÊM DÒNG NÀY
+import type { Product } from "src/model/product";
+
+import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -10,6 +12,7 @@ import Typography from '@mui/material/Typography';
 
 import { _products } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { apiGetProducts } from "src/services/productApi";
 
 import { Iconify } from 'src/components/iconify';
 
@@ -50,7 +53,25 @@ const defaultFilters = {
 
 export function ProductsView() {
   const navigate = useNavigate(); 
+  const [products, setProducts] = useState<Product[]>([]);
+
   
+   // 🔥 GỌI API LẤY SẢN PHẨM
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const data = await apiGetProducts();
+        console.log("Products:", data);
+
+        setProducts(data); // backend trả array → set luôn
+      } catch (err) {
+        console.error("Load products failed:", err);
+      }
+    }
+
+    loadProducts();
+  }, []);
+
   const [sortBy, setSortBy] = useState('featured');
   const [openFilter, setOpenFilter] = useState(false);
   const [filters, setFilters] = useState<FiltersProps>(defaultFilters);
@@ -151,15 +172,24 @@ export function ProductsView() {
       </Box>
 
       <Grid container spacing={3}>
-        {_products.map((product) => (
-          <Grid key={product.id} size={{ xs: 12, sm: 6, md: 3 }}>
+        {products.map((product) => (
+          <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
             <ProductItem 
-              product={product}
+               product={{
+                 _id: product._id,
+                name: product.name,
+                price: product.price,
+                url: product.url,
+                rating_avg: product.rating_avg,
+              }}
               onEdit={handleEditProduct} // ← THÊM PROP NÀY
             />
           </Grid>
         ))}
       </Grid>
+
+
+ 
 
       {/* <Pagination count={10} color="primary" sx={{ mt: 8, mx: 'auto' }} /> */}
     </DashboardContent>

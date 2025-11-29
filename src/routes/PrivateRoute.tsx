@@ -6,11 +6,12 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ children }: PrivateRouteProps) {
-  // const token = localStorage.getItem("adminToken");
+  const token = localStorage.getItem("adminToken");
+  
 
-  // if (!token) {
-  //   return <Navigate to="/sign-in" replace />;
-  // }
+  if (!token) {
+    return <Navigate to="/sign-in" replace />;
+  }
 
   return <>{children}</>;
 }

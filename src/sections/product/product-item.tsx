@@ -10,16 +10,23 @@ import { fCurrency } from 'src/utils/format-number';
 
 // ----------------------------------------------------------------------
 
+// export type ProductItemProps = {
+//   id: string;
+//   name: string;
+//   price: number;
+//   coverUrl: string;
+//   ratingAverage?: number;
+//   // Thêm optional fields để tránh lỗi type
+//   priceSale?: number | null;
+//   colors?: string[];
+//   status?: string;
+// };
 export type ProductItemProps = {
-  id: string;
+  _id: string;
   name: string;
   price: number;
-  coverUrl: string;
-  ratingAverage?: number;
-  // Thêm optional fields để tránh lỗi type
-  priceSale?: number | null;
-  colors?: string[];
-  status?: string;
+  url: string;
+  rating_avg: number;
 };
 
 type Props = {
@@ -32,7 +39,7 @@ export function ProductItem({ product, onEdit }: Props) {
     <Box
       component="img"
       alt={product.name}
-      src={product.coverUrl}
+      src={product.url}
       sx={{
         top: 0,
         width: 1,
@@ -53,7 +60,7 @@ export function ProductItem({ product, onEdit }: Props) {
     <Stack direction="row" alignItems="center" spacing={0.5}>
       <Rating 
         name="read-only" 
-        value={product.ratingAverage}
+        value={product.rating_avg}
         precision={0.1} 
         readOnly 
         size="small"
@@ -71,7 +78,7 @@ export function ProductItem({ product, onEdit }: Props) {
           transform: 'translateY(-4px)',
         },
       }}
-      onClick={() => onEdit?.(product.id)}
+      onClick={() => onEdit?.(product._id)}
     >
       <Box sx={{ pt: '100%', position: 'relative' }}>
         {renderImg}
@@ -85,7 +92,7 @@ export function ProductItem({ product, onEdit }: Props) {
           noWrap
           onClick={(e) => {
             e.stopPropagation();
-            onEdit?.(product.id);
+            onEdit?.(product._id);
           }}
           sx={{ cursor: 'pointer' }}
         >
