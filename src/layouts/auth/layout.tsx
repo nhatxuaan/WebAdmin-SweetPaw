@@ -52,15 +52,20 @@ export function AuthLayout({
       leftArea: (
         <>
           {/** @slot Logo */}
-          <Logo />
+          {/* <Logo /> */}
+          <img
+            src="/logo.svg"
+            alt="SweetPaw Logo"
+            style={{ width: 60, height: 60 }}
+          />
         </>
       ),
       rightArea: (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 1.5 } }}>
           {/** @slot Help link */}
-          <Link href="#" component={RouterLink} color="inherit" sx={{ typography: 'subtitle2' }}>
+          {/* <Link href="#" component={RouterLink} color="inherit" sx={{ typography: 'subtitle2' }}>
             Need help?
-          </Link>
+          </Link> */}
         </Box>
       ),
     };

@@ -20,8 +20,11 @@ export function SignInView() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  //Xử lý đăng nhập
   const handleSignIn = useCallback(() => {
-    router.push('/');
+
+    //localStorage.setItem("adminToken", "fake-token");
+    router.push("/sweetpaw");
   }, [router]);
 
   const renderForm = (
@@ -121,15 +124,30 @@ export function SignInView() {
           justifyContent: 'center',
         }}
       >
-        <IconButton color="inherit">
-          <Iconify width={22} icon="socials:google" />
-        </IconButton>
-        <IconButton color="inherit">
+        {/* <Button>
+          
+          <IconButton color="inherit">
+            <Iconify width={22} icon="socials:google" />
+          </IconButton>
+          Đăng ký với Google
+        </Button> */}
+
+        <Button
+          startIcon={<Iconify width={22} icon="socials:google" />}
+          sx={{
+            color: '#000',
+            textTransform: 'none',
+          }}
+        >
+        Đăng ký với Google
+        </Button>
+        
+        {/* <IconButton color="inherit">
           <Iconify width={22} icon="socials:github" />
         </IconButton>
         <IconButton color="inherit">
           <Iconify width={22} icon="socials:twitter" />
-        </IconButton>
+        </IconButton> */}
       </Box>
     </>
   );

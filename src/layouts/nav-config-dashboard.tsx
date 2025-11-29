@@ -15,17 +15,17 @@ export type NavItem = {
 export const navData = [
   {
     title: 'Dashboard',
-    path: '/',
+    path: '/sweetpaw',
     icon: icon('ic-analytics'),
   },
   {
     title: 'Khách hàng',
-    path: '/user',
+    path: '/sweetpaw/user',
     icon: icon('ic-user'),
   },
   {
     title: 'Sản phẩm',
-    path: '/products',
+    path: '/sweetpaw/products',
     icon: icon('ic-cart'),
     // info: (
     //   <Label color="error" variant="inverted">
@@ -35,8 +35,13 @@ export const navData = [
   },
   {
     title: 'Tin nhắn',
-    path: '/blog',
+    path: '/sweetpaw/blog',
     icon: icon('ic-blog'),
+      info: (
+      <Label color="error" variant="inverted">
+        +3
+      </Label>
+    ),
   },
   {
     title: 'Sign in',
@@ -45,7 +50,7 @@ export const navData = [
   },
   {
     title: 'Not found',
-    path: '/404',
+    path: '/sweetpaw/404',
     icon: icon('ic-disabled'),
   },
 ];

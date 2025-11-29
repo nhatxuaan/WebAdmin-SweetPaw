@@ -44,7 +44,7 @@ export function UserView() {
   // Xử lý khi click "Thêm khách hàng mới"
 
   const handleAddCustomer = useCallback(() => {
-    navigate('/user/new/edit');
+    navigate('/sweetpaw/user/new/edit');
   }, [navigate]);
 
   return (

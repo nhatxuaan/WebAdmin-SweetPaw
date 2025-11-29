@@ -49,7 +49,7 @@ const defaultFilters = {
 };
 
 export function ProductsView() {
-  const navigate = useNavigate(); // ← THÊM DÒNG NÀY
+  const navigate = useNavigate(); 
   
   const [sortBy, setSortBy] = useState('featured');
   const [openFilter, setOpenFilter] = useState(false);
@@ -73,12 +73,12 @@ export function ProductsView() {
 
   // Xử lý khi click vào sản phẩm
   const handleEditProduct = useCallback((productId: string) => {
-    navigate(`/products/${productId}/edit`);
+    navigate(`/sweetpaw/products/${productId}/edit`);
   }, [navigate]);
 
   // Xử lý khi click "Thêm sản phẩm mới"
   const handleAddProduct = useCallback(() => {
-    navigate('/products/new/edit');
+    navigate('/sweetpaw/products/new/edit');
   }, [navigate]);
 
   const canReset = Object.keys(filters).some(

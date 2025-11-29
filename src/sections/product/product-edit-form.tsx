@@ -65,7 +65,7 @@ export default function ProductEditView() {
           category: 'banhkem',
           stock: '50',
           description: 'Bánh kem dâu tây',
-          coverUrl: '/assets/images/product/product_1.webp',
+          coverUrl: 'https://res.cloudinary.com/djyflat5m/image/upload/v1760620872/banh_kem_trai_tim_socola_sf6tw2.png',
         });
         setLoading(false);
       }, 500);
@@ -92,7 +92,7 @@ export default function ProductEditView() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       
       // Quay về trang danh sách
-      navigate('/products');
+      navigate('/sweetpaw/products');
     } catch (error) {
       console.error('Error saving product:', error);
     } finally {
@@ -107,7 +107,7 @@ const handleDeleteProduct = useCallback(async () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')) {
         try {
             setLoading(true);
-            // ⚠️ BƯỚC QUAN TRỌNG: GỌI API XÓA
+            // BƯỚC QUAN TRỌNG: GỌI API XÓA
             // await api.delete(`/products/${id}`); 
             
             // Ví dụ delay để mô phỏng API call
@@ -116,7 +116,7 @@ const handleDeleteProduct = useCallback(async () => {
             alert('Sản phẩm đã được xóa thành công!');
             
             // Điều hướng về trang danh sách sản phẩm
-            navigate('/products'); 
+            navigate('/sweetpaw/products'); 
 
         } catch (error) {
             console.error("Lỗi khi xóa sản phẩm:", error);
@@ -152,7 +152,7 @@ const handleDeleteProduct = useCallback(async () => {
         <Button
           variant="text"
           //startIcon={<Iconify icon="eva:arrow-back-fill" />}
-          onClick={() => navigate('/products')}
+          onClick={() => navigate('/sweetpaw/products')}
         >
           Quay lại
         </Button>

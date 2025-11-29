@@ -76,7 +76,7 @@ export default function UserEditView() {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       
       // Quay về trang danh sách
-      navigate('/user');
+      navigate('/sweetpaw/user');
     } catch (error) {
       console.error('Error saving customer:', error);
     } finally {
@@ -89,7 +89,7 @@ const handleDeleteProduct = useCallback(async () => {
     if (window.confirm('Bạn có chắc chắn muốn xóa khách hàng này không?')) {
         try {
             setLoading(true);
-            // ⚠️ BƯỚC QUAN TRỌNG: GỌI API XÓA
+            // BƯỚC QUAN TRỌNG: GỌI API XÓA
             // await api.delete(`/user/${id}`); 
             
             // Ví dụ delay để mô phỏng API call
@@ -98,7 +98,7 @@ const handleDeleteProduct = useCallback(async () => {
             alert('Khách hàng đã được xóa thành công!');
             
             // Điều hướng về trang danh sách khách hàng
-            navigate('/user'); 
+            navigate('/sweetpaw/user'); 
 
         } catch (error) {
             console.error("Lỗi khi xóa khách hàng:", error);
@@ -133,7 +133,7 @@ const handleDeleteProduct = useCallback(async () => {
         </Typography>
         <Button
           variant="text"
-          onClick={() => navigate('/user')}
+          onClick={() => navigate('/sweetpaw/user')}
         >
           Quay lại
         </Button>

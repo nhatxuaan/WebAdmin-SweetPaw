@@ -12,7 +12,12 @@ import { Logo } from 'src/components/logo';
 export function NotFoundView() {
   return (
     <>
-      <Logo sx={{ position: 'fixed', top: 20, left: 20 }} />
+      {/* <Logo sx={{ position: 'fixed', top: 20, left: 20 }} /> */}
+      <img
+        src="/logo.svg"
+        alt="SweetPaw Logo"
+        style={{ width: 60, height: 60, position: 'fixed', top: 20, left: 20  }}
+      />
 
       <Container
         sx={{
@@ -43,7 +48,7 @@ export function NotFoundView() {
           }}
         />
 
-        <Button component={RouterLink} href="/" size="large" variant="contained" color="inherit">
+        <Button component={RouterLink} href="/sweetpaw" size="large" variant="contained" color="inherit">
           Go to home
         </Button>
       </Container>

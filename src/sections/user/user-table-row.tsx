@@ -46,19 +46,19 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
 
     // Xử lý khi click chỉnh sửa khách hàng
   const handleEditCustomer = useCallback((customerId: string) => {
-    navigate(`/user/${customerId}/edit`);
+    navigate(`/sweetpaw/user/${customerId}/edit`);
   }, [navigate]);
 
     // Xử lý khi click xóa khách hàng
   // Xử lý khi click xóa khách hàng
-// ✅ HÀM NÀY PHẢI NHẬN ID KHÁCH HÀNG CẦN XÓA
+// HÀM NÀY PHẢI NHẬN ID KHÁCH HÀNG CẦN XÓA
 const handleDeleteCustomer = useCallback(async (customerId: string) => { 
 
 
     if (window.confirm('Bạn có chắc chắn muốn xóa khách hàng này không?')) {
         try {
 
-            // ⚠️ BƯỚC QUAN TRỌNG: GỌI API XÓA KHÁCH HÀNG
+            //  BƯỚC QUAN TRỌNG: GỌI API XÓA KHÁCH HÀNG
             // Bạn cần truyền hàm setLoading từ component cha (UserView) xuống để dùng
             // TẠM THỜI: Chỉ dùng API và điều hướng
             
@@ -71,7 +71,7 @@ const handleDeleteCustomer = useCallback(async (customerId: string) => {
             alert('Khách hàng đã được xóa thành công!');
             
             // Điều hướng về trang danh sách khách hàng (HOẶC TỐT HƠN: Làm mới danh sách)
-            navigate('/user'); // Điều hướng về trang danh sách USER
+            navigate('/sweetpaw/user'); // Điều hướng về trang danh sách USER
 
         } catch (error) {
             console.error("Lỗi khi xóa khách hàng:", error);

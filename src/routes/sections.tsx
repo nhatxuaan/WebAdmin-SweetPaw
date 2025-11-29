@@ -2,6 +2,7 @@ import type { RouteObject } from 'react-router';
 
 import { lazy, Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { varAlpha } from 'minimal-shared/utils';
 
 import Box from '@mui/material/Box';
@@ -9,6 +10,8 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
+
+import PrivateRoute from './PrivateRoute';
 
 // ----------------------------------------------------------------------
 
@@ -40,25 +43,31 @@ const renderFallback = () => (
   </Box>
 );
 
-
 export const routesSection: RouteObject[] = [
   {
+    index: true,
+    element: <Navigate to="/sign-in" replace />, // Mở web => sign-in
+  },
+  {
+    path: 'sweetpaw',
     element: (
-      <DashboardLayout>
-        <Suspense fallback={renderFallback()}>
-          <Outlet />
-        </Suspense>
-      </DashboardLayout>
+      <PrivateRoute>
+        <DashboardLayout>
+          <Suspense fallback={renderFallback()}>
+            <Outlet />
+          </Suspense>
+        </DashboardLayout>
+      </PrivateRoute>
     ),
     children: [
       { index: true, element: <DashboardPage /> },
-      { 
-        path: 'user', 
+      {
+        path: 'user',
         children: [
           { index: true, element: <UserPage /> },
           { path: ':id/edit', element: <UserEditPage /> },
-        ]
-    },
+        ],
+      },
 
       { path: 'blog', element: <BlogPage /> },
       {
@@ -84,5 +93,5 @@ export const routesSection: RouteObject[] = [
   //   path: '404',
   //   element: <Page404 />,
   // },
-  // { path: '*', element: <Page404 /> },
+  { path: '*', element: <Page404 /> },
 ];
