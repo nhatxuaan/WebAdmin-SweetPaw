@@ -27,7 +27,7 @@ const CATEGORY_OPTIONS = [
   { value: 'banhmini', label: 'Bánh mini' },
 ];
 
-export default function ProductEditView() {
+export default function ProductCreateView() {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -106,7 +106,7 @@ export default function ProductEditView() {
         <Link
           underline="hover"
           color="inherit"
-          onClick={() => navigate('/products')}
+          onClick={() => navigate('/sweetpaw/products')}
           sx={{ cursor: 'pointer' }}
         >
           Sản phẩm
