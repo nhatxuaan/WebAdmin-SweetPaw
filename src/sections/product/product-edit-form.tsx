@@ -1,3 +1,4 @@
+import { useLocation } from "react-router-dom";
 import { useParams, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
@@ -19,17 +20,18 @@ import { Iconify } from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 const CATEGORY_OPTIONS = [
-  { value: 'banhkem', label: 'Bánh kem' },
-  { value: 'banhmi', label: 'Bánh mì' },
-  { value: 'banhngot', label: 'Bánh ngọt' },
-  { value: 'banhquy', label: 'Bánh quy' },
-  { value: 'douong', label: 'Đồ uống' },
-  { value: 'banhmini', label: 'Bánh mini' },
+  { value: 'Bánh kem', label: 'Bánh kem' },
+  { value: 'Bánh mì', label: 'Bánh mì' },
+  { value: 'Bánh ngọt', label: 'Bánh ngọt' },
+  { value: 'Bánh quy', label: 'Bánh quy' },
+  { value: 'Đồ uống', label: 'Đồ uống' },
+  { value: 'Bánh mini', label: 'Bánh mini' },
 ];
 
 export default function ProductEditView() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { state: product } = useLocation();
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -44,30 +46,45 @@ export default function ProductEditView() {
   });
 
   // Fetch dữ liệu sản phẩm khi chỉnh sửa
-  useEffect(() => {
-      setLoading(true);
-      // TODO: Gọi API để lấy thông tin sản phẩm
-      // const fetchProduct = async () => {
-      //   const response = await fetch(`/api/products/${id}`);
-      //   const data = await response.json();
-      //   setFormData(data);
-      // };
-      // fetchProduct();
+  // useEffect(() => {
+  //     setLoading(true);
+  //     // TODO: Gọi API để lấy thông tin sản phẩm
+  //     // const fetchProduct = async () => {
+  //     //   const response = await fetch(`/api/products/${id}`);
+  //     //   const data = await response.json();
+  //     //   setFormData(data);
+  //     // };
+  //     // fetchProduct();
 
-      // Mock data để demo
-      setTimeout(() => {
-        setFormData({
-          name: `Bánh kem dâu tây`,
-          costprice: '200000',
-          sellingprice: '299000',
-          category: 'banhkem',
-          stock: '50',
-          description: 'Bánh kem dâu tây',
-          coverUrl: 'https://res.cloudinary.com/djyflat5m/image/upload/v1760620872/banh_kem_trai_tim_socola_sf6tw2.png',
-        });
-        setLoading(false);
-      }, 500);
-  }, [id]);
+  //     // Mock data để demo
+  //     setTimeout(() => {
+  //       setFormData({
+  //         name: `Bánh kem dâu tây`,
+  //         costprice: '200000',
+  //         sellingprice: '299000',
+  //         category: 'banhkem',
+  //         stock: '50',
+  //         description: 'Bánh kem dâu tây',
+  //         coverUrl: 'https://res.cloudinary.com/djyflat5m/image/upload/v1760620872/banh_kem_trai_tim_socola_sf6tw2.png',
+  //       });
+  //       setLoading(false);
+  //     }, 500);
+  // }, [id]);
+
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name,
+        costprice: product.cost.toString(),
+        sellingprice: product.price.toString(),
+        category: product.category.toString(),
+        stock: product.stock.toString(),
+        description: product.des,
+        coverUrl: product.url,
+      });
+    }
+  }, [product]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

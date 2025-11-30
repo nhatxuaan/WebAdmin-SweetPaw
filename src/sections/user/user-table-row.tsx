@@ -223,12 +223,20 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     setOpenPopover(null);
   }, []);
 
+  // const handleEditCustomer = useCallback(
+  //   (customerId: string) => {
+  //     navigate(`/sweetpaw/user/${customerId}/edit`);
+  //   },
+  //   [navigate]
+  // );
+
   const handleEditCustomer = useCallback(
-    (customerId: string) => {
-      navigate(`/sweetpaw/user/${customerId}/edit`);
+    (customer: UserProps) => {
+      navigate(`/sweetpaw/user/${customer._id}/edit`, { state: customer });
     },
     [navigate]
   );
+
 
   const handleDeleteCustomer = useCallback(
     async (customerId: string) => {
@@ -316,7 +324,8 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
           <MenuItem
             onClick={() => {
               handleClosePopover();
-              handleEditCustomer(row._id);
+              //handleEditCustomer(row._id);
+              handleEditCustomer(row);
             }}
           >
             <Iconify icon="solar:pen-bold" />

@@ -27,12 +27,12 @@ import type { FiltersProps } from '../product-filters';
 
 const CATEGORY_OPTIONS = [
   { value: 'all', label: 'Tất cả' },
-  { value: 'banhkem', label: 'Bánh kem' },
-  { value: 'banhmi', label: 'Bánh mì' },
-  { value: 'banhngot', label: 'Bánh ngọt' },
-  { value: 'banhquy', label: 'Bánh quy' },
-  { value: 'douong', label: 'Đồ uống' },
-  { value: 'banhmini', label: 'Bánh mini' },
+  { value: 'Bánh kem', label: 'Bánh kem' },
+  { value: 'Bánh mì', label: 'Bánh mì' },
+  { value: 'Bánh ngọt', label: 'Bánh ngọt' },
+  { value: 'Bánh quy', label: 'Bánh quy' },
+  { value: 'Đồ uống', label: 'Đồ uống' },
+  { value: 'Bánh mini', label: 'Bánh mini' },
 ];
 
 const RATING_OPTIONS = ['up4Star', 'up3Star', 'up2Star', 'up1Star'];
@@ -51,12 +51,13 @@ const defaultFilters = {
   category: CATEGORY_OPTIONS[0].value,
 };
 
+
 export function ProductsView() {
   const navigate = useNavigate(); 
   const [products, setProducts] = useState<Product[]>([]);
 
   
-   // 🔥 GỌI API LẤY SẢN PHẨM
+   // GỌI API LẤY SẢN PHẨM
   useEffect(() => {
     async function loadProducts() {
       try {
@@ -93,8 +94,12 @@ export function ProductsView() {
   }, []);
 
   // Xử lý khi click vào sản phẩm
-  const handleEditProduct = useCallback((productId: string) => {
-    navigate(`/sweetpaw/products/${productId}/edit`);
+  // const handleEditProduct = useCallback((productId: string) => {
+  //   navigate(`/sweetpaw/products/${productId}/edit`);
+  // }, [navigate]);
+
+  const handleEditProduct = useCallback((product: Product) => {
+    navigate(`/sweetpaw/products/${product._id}/edit`, { state: product });
   }, [navigate]);
 
   // Xử lý khi click "Thêm sản phẩm mới"
@@ -175,14 +180,17 @@ export function ProductsView() {
         {products.map((product) => (
           <Grid key={product._id} size={{ xs: 12, sm: 6, md: 3 }}>
             <ProductItem 
-               product={{
-                 _id: product._id,
-                name: product.name,
-                price: product.price,
-                url: product.url,
-                rating_avg: product.rating_avg,
-              }}
-              onEdit={handleEditProduct} // ← THÊM PROP NÀY
+              // product={{
+              //    _id: product._id,
+              //   name: product.name,
+              //   price: product.price,
+              //   url: product.url,
+              //   rating_avg: product.rating_avg,
+              // }}
+              // onEdit={handleEditProduct} // ← THÊM PROP NÀY
+
+              product={product}     // truyền full object từ backend
+              onEdit={handleEditProduct}
             />
           </Grid>
         ))}

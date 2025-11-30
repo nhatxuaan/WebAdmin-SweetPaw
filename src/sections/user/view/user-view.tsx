@@ -23,9 +23,8 @@ import { TableEmptyRows } from '../table-empty-rows';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
-// ----------------------
-// ⭐ DEFINE CUSTOMER TYPE
-// ----------------------
+
+// DEFINE CUSTOMER TYPE
 interface Customer {
   _id: string;
   HoTen: string;
@@ -41,9 +40,7 @@ export function UserView() {
   const [filterName, setFilterName] = useState('');
   const [customers, setCustomers] = useState<Customer[]>([]);
 
-  // -----------------------------
   //  GET DATA FROM BACKEND
-  // -----------------------------
   useEffect(() => {
     async function fetchCustomers() {
       try {
@@ -58,9 +55,7 @@ export function UserView() {
     fetchCustomers();
   }, []);
 
-  // -----------------------------
   // FILTER DATA
-  // -----------------------------
   const dataFiltered = applyFilter({
     inputData: customers,
     comparator: getComparator(table.order, table.orderBy),
@@ -109,7 +104,6 @@ export function UserView() {
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
             <Table sx={{ minWidth: 800 }}>
-
               <UserTableHead
                 order={table.order}
                 orderBy={table.orderBy}
@@ -119,9 +113,7 @@ export function UserView() {
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    customers
-                      .filter((u) => u && u._id)
-                      .map((u) => u._id)
+                    customers.filter((u) => u && u._id).map((u) => u._id)
                   )
                 }
                 headLabel={[
@@ -156,7 +148,6 @@ export function UserView() {
 
                 {notFound && <TableNoData searchQuery={filterName} />}
               </TableBody>
-
             </Table>
           </TableContainer>
         </Scrollbar>
@@ -175,9 +166,9 @@ export function UserView() {
   );
 }
 
-// ------------------------------
-// TABLE HOOK (KHÔNG ĐỤNG ĐẾN _users NỮA)
-// ------------------------------
+
+// TABLE HOOK
+
 export function useTable() {
   const [page, setPage] = useState(0);
   const [orderBy, setOrderBy] = useState('HoTen'); // default sort
@@ -211,20 +202,19 @@ export function useTable() {
   const onResetPage = useCallback(() => setPage(0), []);
 
   const onChangePage = useCallback(
-  (event: MouseEvent<HTMLButtonElement> | null, newPage: number) => {
-    setPage(newPage);
-  },
-  []
-);
-
+    (event: MouseEvent<HTMLButtonElement> | null, newPage: number) => {
+      setPage(newPage);
+    },
+    []
+  );
 
   const onChangeRowsPerPage = useCallback(
-  (event: ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    onResetPage();
-  },
-  [onResetPage]
-);
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      onResetPage();
+    },
+    [onResetPage]
+  );
 
   return {
     page,

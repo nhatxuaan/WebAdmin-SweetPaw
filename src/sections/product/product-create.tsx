@@ -19,12 +19,12 @@ import { Iconify } from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 const CATEGORY_OPTIONS = [
-  { value: 'banhkem', label: 'Bánh kem' },
-  { value: 'banhmi', label: 'Bánh mì' },
-  { value: 'banhngot', label: 'Bánh ngọt' },
-  { value: 'banhquy', label: 'Bánh quy' },
-  { value: 'douong', label: 'Đồ uống' },
-  { value: 'banhmini', label: 'Bánh mini' },
+  { value: 'Bánh kem', label: 'Bánh kem' },
+  { value: 'Bánh mì', label: 'Bánh mì' },
+  { value: 'Bánh ngọt', label: 'Bánh ngọt' },
+  { value: 'Bánh quy', label: 'Bánh quy' },
+  { value: 'Đồ uống', label: 'Đồ uống' },
+  { value: 'Bánh mini', label: 'Bánh mini' },
 ];
 
 export default function ProductCreateView() {
@@ -37,7 +37,7 @@ export default function ProductCreateView() {
     name: '',
     costprice: '',
     sellingprice: '',
-    category: 'banhkem',
+    category: 'Bánh kem',
     stock: '',
     description: '',
     coverUrl: '',
@@ -61,7 +61,7 @@ export default function ProductCreateView() {
           name: `Bánh kem dâu tây`,
           costprice: '200000',
           sellingprice: '299000',
-          category: 'banhkem',
+          category: 'Bánh kem',
           stock: '50',
           description: 'Bánh kem dâu tây',
           coverUrl: 'https://res.cloudinary.com/djyflat5m/image/upload/v1760620872/banh_kem_trai_tim_socola_sf6tw2.png',

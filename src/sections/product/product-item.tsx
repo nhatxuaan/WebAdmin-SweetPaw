@@ -1,4 +1,6 @@
 // src/sections/product/product-item.tsx
+import type { Product } from "src/model/product";
+
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
@@ -7,6 +9,7 @@ import Rating from '@mui/material/Rating';
 import Typography from '@mui/material/Typography';
 
 import { fCurrency } from 'src/utils/format-number';
+
 
 // ----------------------------------------------------------------------
 
@@ -21,17 +24,29 @@ import { fCurrency } from 'src/utils/format-number';
 //   colors?: string[];
 //   status?: string;
 // };
-export type ProductItemProps = {
-  _id: string;
-  name: string;
-  price: number;
-  url: string;
-  rating_avg: number;
-};
+
+export type ProductItemProps = Product;
+// export type ProductItemProps = {
+//   _id: string;
+//   name: string;
+//   price: number;
+//   url: string;
+//   rating_avg: number;
+
+//   category: string;
+//   flavor: string;
+//   cost: number;
+//   des: string;
+//   stock: number;
+//   sold_count: number;
+//   weight: number;
+// };
 
 type Props = {
   product: ProductItemProps;
-  onEdit?: (productId: string) => void;
+  // onEdit?: (productId: string) => void;
+  onEdit?: (product: ProductItemProps) => void;
+  
 };
 
 export function ProductItem({ product, onEdit }: Props) {
@@ -78,7 +93,8 @@ export function ProductItem({ product, onEdit }: Props) {
           transform: 'translateY(-4px)',
         },
       }}
-      onClick={() => onEdit?.(product._id)}
+      //onClick={() => onEdit?.(product._id)}
+      onClick={() => onEdit?.(product)}
     >
       <Box sx={{ pt: '100%', position: 'relative' }}>
         {renderImg}
@@ -92,7 +108,8 @@ export function ProductItem({ product, onEdit }: Props) {
           noWrap
           onClick={(e) => {
             e.stopPropagation();
-            onEdit?.(product._id);
+            //onEdit?.(product._id);
+            onEdit?.(product);
           }}
           sx={{ cursor: 'pointer' }}
         >

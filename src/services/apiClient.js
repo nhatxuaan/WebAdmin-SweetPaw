@@ -1,9 +1,9 @@
 // src/services/apiClient.js
 
-//export const API_URL = "https://sweetpaw-be.azurewebsites.net"; // domain backend
+export const API_URL = "https://sweetpaw-be.azurewebsites.net"; // domain backend
 
 //http://localhost:3000/
-export const API_URL = "http://localhost:3000"
+//export const API_URL = "http://localhost:3000"
 
 
 // Hàm POST chung (không cần token)

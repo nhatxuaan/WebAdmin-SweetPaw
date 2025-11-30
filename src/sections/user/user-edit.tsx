@@ -1,3 +1,4 @@
+import { useLocation } from "react-router-dom";
 import { useParams, useNavigate } from 'react-router-dom';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
@@ -23,7 +24,7 @@ export default function UserEditView() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isNewUser = id === 'new';
-
+  const { state: customer } = useLocation();
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,27 +35,41 @@ export default function UserEditView() {
   });
 
   // Fetch dữ liệu sản phẩm khi chỉnh sửa
-  useEffect(() => {
-      setLoading(true);
-      // TODO: Gọi API để lấy thông tin sản phẩm
-      // const fetchProduct = async () => {
-      //   const response = await fetch(`/api/products/${id}`);
-      //   const data = await response.json();
-      //   setFormData(data);
-      // };
-      // fetchProduct();
+  // useEffect(() => {
+  //     setLoading(true);
+  //     // TODO: Gọi API để lấy thông tin sản phẩm
+  //     // const fetchProduct = async () => {
+  //     //   const response = await fetch(`/api/products/${id}`);
+  //     //   const data = await response.json();
+  //     //   setFormData(data);
+  //     // };
+  //     // fetchProduct();
 
-      // Mock data để demo
-      setTimeout(() => {
-        setFormData({
-          name: `Ngô Nhật Xuân`,
-          email: 'nhatxuaan@gmail.com',
-          phoneNumber: '0348957446',
-          address: '123 Đường ABC, Phường XYZ, Quận 1, TP.HCM',
-        });
-        setLoading(false);
-      }, 500);
-    }, [id]);
+  //     // Mock data để demo
+  //     setTimeout(() => {
+  //       setFormData({
+  //         name: `Ngô Nhật Xuân`,
+  //         email: 'nhatxuaan@gmail.com',
+  //         phoneNumber: '0348957446',
+  //         address: '123 Đường ABC, Phường XYZ, Quận 1, TP.HCM',
+  //       });
+  //       setLoading(false);
+  //     }, 500);
+  //   }, [id]);
+
+
+  useEffect(() => {
+    if (customer) {
+      setFormData({
+        name: customer.HoTen,
+        email: customer.Email,
+        phoneNumber: customer.SoDienThoai || "",
+        address: customer.DiaChi?.[0]
+          ? `${customer.DiaChi[0].SoNha} ${customer.DiaChi[0].TenDuong}, ${customer.DiaChi[0].PhuongXa}, ${customer.DiaChi[0].QuanHuyen}, ${customer.DiaChi[0].ThanhPho}`
+          : ""
+      });
+    }
+  }, [customer]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -71,6 +86,8 @@ export default function UserEditView() {
     try {
       // TODO: Gọi API để lưu khách hàng
       console.log('Saving customer:', formData);
+      
+      console.log('Inserting:', formData);
       
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
