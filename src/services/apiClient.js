@@ -1,33 +1,74 @@
 // src/services/apiClient.js
 
-export const API_URL = "https://sweetpaw-be.azurewebsites.net"; // domain backend
+export const API_URL = 'https://sweetpaw-be.azurewebsites.net'; // domain backend
 
 //http://localhost:3000/
 //export const API_URL = "http://localhost:3000"
 
-
 // Hàm POST chung (không cần token)
 export async function apiPost(path, body) {
   const res = await fetch(`${API_URL}${path}`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
   });
 
   return res.json();
 }
-// Hàm GET có token (dành cho admin)
-export async function apiGetAuth(path) {
+
+// Hàm POST có token (dành cho admin)
+// export async function apiPostAuth(path, body) {
+//   const token = localStorage.getItem('adminToken');
+//   console.log('Token gửi lên:', token);
+
+//   const res = await fetch(`${API_URL}${path}`, {
+//     method: 'POST',
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify(body),
+//   });
+
+//   if (!res.ok) {
+//     const errText = await res.text();
+//     throw new Error(`API ${path} lỗi: ${res.status} – ${errText}`);
+//   }
+
+//   return res.json();
+// }
+
+export async function apiPostAuth(path, body) {
   const token = localStorage.getItem("adminToken");
-  console.log("Token lấy từ localStorage:", token);
+
+  console.log("Token gửi lên:", token);
 
   const res = await fetch(`${API_URL}${path}`, {
-    method: "GET",
+    method: "POST",
     headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: body,
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(`API ${path} lỗi: ${res.status} – ${JSON.stringify(data)}`);
+
+  return data;
+}
+
+// Hàm GET có token (dành cho admin)
+export async function apiGetAuth(path) {
+  const token = localStorage.getItem('adminToken');
+  console.log('Token lấy từ localStorage:', token);
+
+  const res = await fetch(`${API_URL}${path}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
     },
   });
 
@@ -37,3 +78,67 @@ export async function apiGetAuth(path) {
 
   return res.json();
 }
+
+// Hàm PUT
+export async function apiPutAuth(path, body) {
+  const token = localStorage.getItem("adminToken");
+
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(`API ${path} lỗi: ${res.status} – ${msg}`);
+  }
+
+  return res.json();
+}
+
+//DELETE
+// export async function apiDeleteAuth(path) {
+//   const token = localStorage.getItem("adminToken");
+//   console.log("Token gửi lên:", token);
+
+//   const res = await fetch(`${API_URL}${path}`, {
+//     method: "DELETE",
+//     headers: {
+//       "Authorization": `Bearer ${token}`,
+//       "Content-Type": "application/json",
+//     },
+//   });
+
+//   if (!res.ok) {
+//     const msg = await res.text();
+//     throw new Error(`API ${path} lỗi: ${res.status} – ${msg}`);
+//   }
+
+//   return res.json();
+// }
+
+export async function apiDeleteAuth(path) {
+  const token = localStorage.getItem("adminToken");
+
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  // Nếu lỗi trả về JSON có message
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => null);
+    const msg = errorData?.message || `Lỗi ${res.status}`;
+
+    throw new Error(msg);
+  }
+
+  return res.json();
+}
+

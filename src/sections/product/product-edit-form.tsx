@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { apiUpdateProduct, apiDeleteProduct } from 'src/services/productApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -38,38 +39,12 @@ export default function ProductEditView() {
     name: '',
     costprice: '',
     sellingprice: '',
-    category: 'banhkem',
+    category: 'Bánh kem',
     stock: '',
     description: '',
     coverUrl: '',
-    //ratingAverage: '',
+    flavor: '',
   });
-
-  // Fetch dữ liệu sản phẩm khi chỉnh sửa
-  // useEffect(() => {
-  //     setLoading(true);
-  //     // TODO: Gọi API để lấy thông tin sản phẩm
-  //     // const fetchProduct = async () => {
-  //     //   const response = await fetch(`/api/products/${id}`);
-  //     //   const data = await response.json();
-  //     //   setFormData(data);
-  //     // };
-  //     // fetchProduct();
-
-  //     // Mock data để demo
-  //     setTimeout(() => {
-  //       setFormData({
-  //         name: `Bánh kem dâu tây`,
-  //         costprice: '200000',
-  //         sellingprice: '299000',
-  //         category: 'banhkem',
-  //         stock: '50',
-  //         description: 'Bánh kem dâu tây',
-  //         coverUrl: 'https://res.cloudinary.com/djyflat5m/image/upload/v1760620872/banh_kem_trai_tim_socola_sf6tw2.png',
-  //       });
-  //       setLoading(false);
-  //     }, 500);
-  // }, [id]);
 
   useEffect(() => {
     if (product) {
@@ -81,6 +56,7 @@ export default function ProductEditView() {
         stock: product.stock.toString(),
         description: product.des,
         coverUrl: product.url,
+        flavor: product.flavor,
       });
     }
   }, [product]);
@@ -94,51 +70,56 @@ export default function ProductEditView() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // TODO: Gọi API để lưu sản phẩm
-      console.log('Saving product:', formData);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Quay về trang danh sách
-      navigate('/sweetpaw/products');
-    } catch (error) {
-      console.error('Error saving product:', error);
+      await apiUpdateProduct(id!, {
+        name: formData.name,
+        category: formData.category,
+        price: formData.sellingprice,
+        cost: formData.costprice,
+        des: formData.description,
+        stock: formData.stock,
+        flavor: formData.flavor,
+        url: formData.coverUrl,
+      });
+
+      navigate("/sweetpaw/products");
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Thêm vào trong ProductEditView.tsx
+
+// Xử lý xóa sản phẩm
 const handleDeleteProduct = useCallback(async () => {
+  if (!window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) return;
 
-    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')) {
-        try {
-            setLoading(true);
-            // BƯỚC QUAN TRỌNG: GỌI API XÓA
-            // await api.delete(`/products/${id}`); 
-            
-            // Ví dụ delay để mô phỏng API call
-            await new Promise(resolve => setTimeout(resolve, 500)); 
+  try {
+    setLoading(true);
 
-            alert('Sản phẩm đã được xóa thành công!');
-            
-            // Điều hướng về trang danh sách sản phẩm
-            navigate('/sweetpaw/products'); 
+    // Gọi API
+    const res = await apiDeleteProduct(id!);
 
-        } catch (error) {
-            console.error("Lỗi khi xóa sản phẩm:", error);
-            alert('Có lỗi xảy ra khi xóa sản phẩm. Vui lòng thử lại.');
-        } finally {
-            setLoading(false);
-        }
-    }
-}, [id, navigate, setLoading]); // Đảm bảo các dependencies cần thiết
+    navigate("/sweetpaw/products");
+
+  } catch (error: any) {
+    const msg =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Có lỗi xảy ra";
+
+    alert(msg);
+  } finally {
+    setLoading(false);
+  }
+}, [id, navigate]);
+
+
 
   return (
     <DashboardContent>
@@ -172,7 +153,7 @@ const handleDeleteProduct = useCallback(async () => {
       </Stack>
 
       {/* Form */}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleUpdate}>
         <Grid container spacing={3}>
           {/* Ảnh sản phẩm */}
           <Grid size={{ xs: 12, md: 4 }}>
@@ -286,6 +267,17 @@ const handleDeleteProduct = useCallback(async () => {
                     />
                   </Grid>
                 </Grid>
+
+                 {/* Mô tả */}
+                <TextField
+                  fullWidth
+                  multiline
+                  name="flavor"
+                  label="Hương vị"
+                  value={formData.flavor}
+                  onChange={handleChange}
+                  placeholder="Nhập mô tả hương vị của sản phẩm..."
+                />
 
                 {/* Mô tả */}
                 <TextField

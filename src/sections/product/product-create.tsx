@@ -13,6 +13,7 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 
 import { DashboardContent } from 'src/layouts/dashboard';
+import { apiCreateProducts } from 'src/services/productApi';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -30,8 +31,7 @@ const CATEGORY_OPTIONS = [
 export default function ProductCreateView() {
   const { id } = useParams();
   const navigate = useNavigate();
-
-
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -41,34 +41,9 @@ export default function ProductCreateView() {
     stock: '',
     description: '',
     coverUrl: '',
-    //ratingAverage: '',
+    flavor: '',
   });
 
-  // Fetch dữ liệu sản phẩm khi chỉnh sửa
-  useEffect(() => {
-      setLoading(true);
-      // TODO: Gọi API để lấy thông tin sản phẩm
-      // const fetchProduct = async () => {
-      //   const response = await fetch(`/api/products/${id}`);
-      //   const data = await response.json();
-      //   setFormData(data);
-      // };
-      // fetchProduct();
-
-      // Mock data để demo
-      setTimeout(() => {
-        setFormData({
-          name: `Bánh kem dâu tây`,
-          costprice: '200000',
-          sellingprice: '299000',
-          category: 'Bánh kem',
-          stock: '50',
-          description: 'Bánh kem dâu tây',
-          coverUrl: 'https://res.cloudinary.com/djyflat5m/image/upload/v1760620872/banh_kem_trai_tim_socola_sf6tw2.png',
-        });
-        setLoading(false);
-      }, 500);
-  }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -78,18 +53,23 @@ export default function ProductCreateView() {
     }));
   };
 
+ 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // TODO: Gọi API để lưu sản phẩm
-      console.log('Saving product:', formData);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Quay về trang danh sách
+      await apiCreateProducts({
+        name: formData.name,
+        category: formData.category,
+        price: formData.sellingprice,  
+        cost: formData.costprice,      
+        des: formData.description,    
+        stock: formData.stock,
+        flavor: formData.flavor,
+        imageFile: imageFile,
+      });
+
       navigate('/sweetpaw/products');
     } catch (error) {
       console.error('Error saving product:', error);
@@ -97,7 +77,6 @@ export default function ProductCreateView() {
       setLoading(false);
     }
   };
-
 
   return (
     <DashboardContent>
@@ -111,16 +90,12 @@ export default function ProductCreateView() {
         >
           Sản phẩm
         </Link>
-        <Typography color="text.primary">
-           Thêm mới
-        </Typography>
+        <Typography color="text.primary">Thêm mới</Typography>
       </Breadcrumbs>
 
       {/* Header */}
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={3}>
-        <Typography variant="h4">
-         Thêm sản phẩm mới
-        </Typography>
+        <Typography variant="h4">Thêm sản phẩm mới</Typography>
         <Button
           variant="text"
           //startIcon={<Iconify icon="eva:arrow-back-fill" />}
@@ -153,18 +128,26 @@ export default function ProductCreateView() {
                   }}
                 />
               )}
-              <TextField
-                fullWidth
-                name="coverUrl"
-                label="URL hình ảnh"
-                value={formData.coverUrl}
-                onChange={handleChange}
-                placeholder="https://example.com/image.jpg"
+      
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setImageFile(file);
+
+                  if (file) {
+                    // preview ảnh ngay
+                    setFormData((prev) => ({
+                      ...prev,
+                      coverUrl: URL.createObjectURL(file),
+                    }));
+                  }
+                }}
               />
             </Card>
           </Grid>
-
-          
 
           {/* Thông tin sản phẩm */}
           <Grid size={{ xs: 12, md: 8 }}>
@@ -232,7 +215,7 @@ export default function ProductCreateView() {
                       ))}
                     </TextField>
                   </Grid>
-                     <Grid size={{ xs: 12, sm: 6 }}>
+                  <Grid size={{ xs: 12, sm: 6 }}>
                     <TextField
                       fullWidth
                       required
@@ -245,6 +228,17 @@ export default function ProductCreateView() {
                     />
                   </Grid>
                 </Grid>
+
+                {/* Mô tả */}
+                <TextField
+                  fullWidth
+                  multiline
+                  name="flavor"
+                  label="Hương vị"
+                  value={formData.flavor}
+                  onChange={handleChange}
+                  placeholder="Nhập mô tả hương vị của sản phẩm..."
+                />
 
                 {/* Mô tả */}
                 <TextField
@@ -277,4 +271,3 @@ export default function ProductCreateView() {
     </DashboardContent>
   );
 }
-
