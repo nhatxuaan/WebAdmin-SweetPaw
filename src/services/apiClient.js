@@ -40,7 +40,7 @@ export async function apiPost(path, body) {
 //   return res.json();
 // }
 
-export async function apiPostAuth(path, body) {
+export async function apiPostAuthNonContent(path, body) {
   const token = localStorage.getItem("adminToken");
 
   console.log("Token gửi lên:", token);
@@ -58,6 +58,26 @@ export async function apiPostAuth(path, body) {
 
   return data;
 }
+
+
+export async function apiPostAuth(path, body) {
+  const token = localStorage.getItem("adminToken");
+
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Lỗi API");
+
+  return data;
+}
+
 
 // Hàm GET có token (dành cho admin)
 export async function apiGetAuth(path) {

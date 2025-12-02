@@ -335,7 +335,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
           <MenuItem
             onClick={() => {
               handleClosePopover();
-              handleDeleteCustomer(row._id);
+             // handleDeleteCustomer(row._id);
             }}
             sx={{ color: 'error.main' }}
           >

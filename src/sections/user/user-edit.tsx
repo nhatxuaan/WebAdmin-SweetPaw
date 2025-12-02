@@ -13,6 +13,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 
+import { apiUpdateUsers } from "src/services/userApi"; 
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
@@ -33,28 +34,6 @@ export default function UserEditView() {
     address: '',
   });
 
-  // Fetch dữ liệu sản phẩm khi chỉnh sửa
-  // useEffect(() => {
-  //     setLoading(true);
-  //     // TODO: Gọi API để lấy thông tin sản phẩm
-  //     // const fetchProduct = async () => {
-  //     //   const response = await fetch(`/api/products/${id}`);
-  //     //   const data = await response.json();
-  //     //   setFormData(data);
-  //     // };
-  //     // fetchProduct();
-
-  //     // Mock data để demo
-  //     setTimeout(() => {
-  //       setFormData({
-  //         name: `Ngô Nhật Xuân`,
-  //         email: 'nhatxuaan@gmail.com',
-  //         phoneNumber: '0348957446',
-  //         address: '123 Đường ABC, Phường XYZ, Quận 1, TP.HCM',
-  //       });
-  //       setLoading(false);
-  //     }, 500);
-  //   }, [id]);
 
 
   useEffect(() => {
@@ -78,52 +57,76 @@ export default function UserEditView() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // const handleUpdate = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+
+  //   try {
+  //     // TODO: Gọi API để lưu khách hàng
+  //     console.log('Saving customer:', formData);
+      
+  //     console.log('Inserting:', formData);
+      
+  //     // Simulate API call
+  //     await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+  //     // Quay về trang danh sách
+  //     navigate('/sweetpaw/user');
+  //   } catch (error) {
+  //     console.error('Error saving customer:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // Thêm vào trong UserEditView.tsx
+
+  const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // TODO: Gọi API để lưu khách hàng
-      console.log('Saving customer:', formData);
-      
-      console.log('Inserting:', formData);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Quay về trang danh sách
-      navigate('/sweetpaw/user');
-    } catch (error) {
-      console.error('Error saving customer:', error);
+      // Xử lý địa chỉ
+      const diaChiArray = [];
+      if (formData.address.trim() !== "") {
+        const parts = formData.address.split(",").map(p => p.trim());
+        diaChiArray.push({
+          SoNha: parts[0] || "",
+          TenDuong: parts[1] || "",
+          PhuongXa: parts[2] || "",
+          QuanHuyen: parts[3] || "",
+          ThanhPho: parts[4] || "",
+          MacDinh: false
+        });
+      }
+
+      const payload = {
+        Hoten: formData.name,
+        HoTen: formData.name,
+        Email: formData.email,
+        SoDienThoai: formData.phoneNumber,
+        DiaChi: diaChiArray
+      };
+
+      console.log("Gửi lên backend:", payload);
+
+      await apiUpdateUsers(id!, payload);
+
+      alert("Cập nhật khách hàng thành công!");
+      navigate("/sweetpaw/user");
+
+    } catch (error: any) {
+      const msg =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Có lỗi xảy ra";
+
+    alert(msg);
     } finally {
       setLoading(false);
     }
-  };
+};
 
-  // Thêm vào trong UserEditView.tsx
-const handleDeleteProduct = useCallback(async () => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa khách hàng này không?')) {
-        try {
-            setLoading(true);
-            // BƯỚC QUAN TRỌNG: GỌI API XÓA
-            // await api.delete(`/user/${id}`); 
-            
-            // Ví dụ delay để mô phỏng API call
-            await new Promise(resolve => setTimeout(resolve, 500)); 
-
-            alert('Khách hàng đã được xóa thành công!');
-            
-            // Điều hướng về trang danh sách khách hàng
-            navigate('/sweetpaw/user'); 
-
-        } catch (error) {
-            console.error("Lỗi khi xóa khách hàng:", error);
-            alert('Có lỗi xảy ra khi xóa khách hàng. Vui lòng thử lại.');
-        } finally {
-            setLoading(false);
-        }
-    }
-}, [id, navigate, setLoading]); // Đảm bảo các dependencies cần thiết
 
   return (
     <DashboardContent>
@@ -156,7 +159,7 @@ const handleDeleteProduct = useCallback(async () => {
       </Stack>
 
       {/* Form */}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleUpdate}>
         <Grid container spacing={3}>
           {/* Thông tin khách hàng */}
           <Grid size={{ xs: 12, md: 12 }}>
@@ -181,6 +184,7 @@ const handleDeleteProduct = useCallback(async () => {
                 <TextField
                   fullWidth
                   required
+                  disabled     //Không cho chỉnh sửa email
                   name="email"
                   label="Email"
                   value={formData.email}
@@ -210,19 +214,6 @@ const handleDeleteProduct = useCallback(async () => {
 
                 {/* Buttons */}
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
-                  {/* Chỉ xuất hiện nút xóa ở màn hình sửa khách hàng */}
-                {/* {!isNewUser && (
-                        <Button
-                            variant="outlined"
-                            color="error" // Màu đỏ, tượng trưng cho hành động nguy hiểm
-                            onClick={handleDeleteProduct} 
-                            disabled={loading}
-                            sx={{ mr: 'auto' }} // Đẩy nút này về phía trái
-                        >
-                            Xóa sản phẩm
-                        </Button>
-                    )} */}
-
                   <Button
                     type="submit"
                     variant="contained"

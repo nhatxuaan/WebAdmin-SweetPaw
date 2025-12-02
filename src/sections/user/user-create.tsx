@@ -13,12 +13,20 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 
+import { apiPostAuth } from "src/services/apiClient";
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
-
+interface DiaChiType  {
+  SoNha: string;
+  TenDuong: string;
+  PhuongXa: string;
+  QuanHuyen: string;
+  ThanhPho: string;
+  MacDinh: boolean;
+}
 
 export default function UserEditView() {
   const { id } = useParams();
@@ -33,42 +41,6 @@ export default function UserEditView() {
     address: '',
   });
 
-  // Fetch dữ liệu sản phẩm khi chỉnh sửa
-  // useEffect(() => {
-  //     setLoading(true);
-  //     // TODO: Gọi API để lấy thông tin sản phẩm
-  //     // const fetchProduct = async () => {
-  //     //   const response = await fetch(`/api/products/${id}`);
-  //     //   const data = await response.json();
-  //     //   setFormData(data);
-  //     // };
-  //     // fetchProduct();
-
-  //     // Mock data để demo
-  //     setTimeout(() => {
-  //       setFormData({
-  //         name: `Ngô Nhật Xuân`,
-  //         email: 'nhatxuaan@gmail.com',
-  //         phoneNumber: '0348957446',
-  //         address: '123 Đường ABC, Phường XYZ, Quận 1, TP.HCM',
-  //       });
-  //       setLoading(false);
-  //     }, 500);
-  //   }, [id]);
-
-
-  useEffect(() => {
-    if (customer) {
-      setFormData({
-        name: customer.HoTen,
-        email: customer.Email,
-        phoneNumber: customer.SoDienThoai || "",
-        address: customer.DiaChi?.[0]
-          ? `${customer.DiaChi[0].SoNha} ${customer.DiaChi[0].TenDuong}, ${customer.DiaChi[0].PhuongXa}, ${customer.DiaChi[0].QuanHuyen}, ${customer.DiaChi[0].ThanhPho}`
-          : ""
-      });
-    }
-  }, [customer]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -78,27 +50,55 @@ export default function UserEditView() {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      // TODO: Gọi API để lưu khách hàng
-      console.log('Saving customer:', formData);
-      
-      console.log('Inserting:', formData);
-      
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Quay về trang danh sách
-      navigate('/sweetpaw/user');
-    } catch (error) {
-      console.error('Error saving customer:', error);
-    } finally {
-      setLoading(false);
+  try {
+    const  diaChiArray: DiaChiType [] = [];
+
+
+    if (formData.address.trim() !== "") {
+      const parts = formData.address.split(",").map(i => i.trim());
+
+      diaChiArray.push({
+        SoNha: parts[0] || "",
+        TenDuong: parts[1] || "",
+        PhuongXa: parts[2] || "",
+        QuanHuyen: parts[3] || "",
+        ThanhPho: parts[4] || "",
+        MacDinh: false
+      });
     }
-  };
+
+    const payload = {
+      Hoten: formData.name,
+      HoTen: formData.name,
+      Email: formData.email,
+      SoDienThoai: formData.phoneNumber,
+      DiaChi: diaChiArray    // nếu không nhập → []
+    };
+
+    console.log("Gửi lên backend:", payload);
+
+    await apiPostAuth("/api/admin/customers", payload);
+
+    navigate("/sweetpaw/user");
+
+  } catch (error: any) {
+    const msg =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Có lỗi xảy ra";
+
+    alert(msg);
+    
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
 
   return (

@@ -1,4 +1,4 @@
-import { apiGetAuth, apiPostAuth, apiPutAuth, apiDeleteAuth } from './apiClient';
+import { apiGetAuth, apiPostAuthNonContent, apiPutAuth, apiDeleteAuth } from './apiClient';
 
 export async function apiGetProducts() {
   return apiGetAuth('/api/admin/products');
@@ -19,7 +19,7 @@ export async function apiCreateProducts(productData: any) {
     formData.append("imageFile", productData.imageFile);
   }
 
-  return apiPostAuth("/api/admin/products", formData);
+  return apiPostAuthNonContent("/api/admin/products", formData);
 }
 
 export async function apiUpdateProduct(id: string, data: any) {
