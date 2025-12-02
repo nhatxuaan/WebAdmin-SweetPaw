@@ -26,6 +26,9 @@ export const UserEditPage = lazy(() => import('src/pages/user-detail'));
 export const OrderPage = lazy(() => import('src/pages/order'));
 export const ProductCreatePage = lazy(() => import('src/sections/product/product-create'));
 export const UserCreatePage = lazy(() => import('src/sections/user/user-create'));
+export const OrderDetailPage = lazy(() => import('src/sections/order/order-detail'));
+export const OrderUpdatePage = lazy(() => import('src/sections/order/order-update'));
+
 
 const renderFallback = () => (
   <Box
@@ -77,7 +80,15 @@ export const routesSection: RouteObject[] = [
       { path: 'blog', element: <BlogPage /> },
 
       // Trang Đơn hàng
-      { path: 'order', element: <OrderPage /> },
+
+      {
+        path: 'order', // Đường dẫn cha: /order
+        children: [
+          { index: true, element: <OrderPage /> },
+          { path: ':id/view', element: <OrderDetailPage /> },
+          { path: ':id/update', element: <OrderUpdatePage /> },
+        ],
+      },
       
       {
         path: 'products', // Đường dẫn cha: /products

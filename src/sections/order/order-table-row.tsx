@@ -1,5 +1,6 @@
+
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom'; // ← THÊM DÒNG NÀY
+import { useNavigate } from 'react-router-dom';
 
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
@@ -11,27 +12,28 @@ import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { Iconify } from 'src/components/iconify';
 
-// ----------------------------------------------------------------------
 
-export type OrderProps = {
-  id: string;
-  name: string;
-  orderDate: Date;
+export interface OrderProps {
+  _id: string;
+  HoTen: string;
+  NgayDat: Date;
+  TongTien: number;
   paymentMethod: string;
-  totalSpent: number;
-  //isVerified: boolean;
-};
+  deliveryStatus: string;
+  paymentStatus: string;
+}
 
-type UserTableRowProps = {
+interface OrderTableRowProps {
   row: OrderProps;
   selected: boolean;
+  //Xem chi tiết đơn hàng
   onSelectRow: () => void;
-};
+  //Cập nhật đơn hàng (trạng thái giao hàng, trạng thái thanh toán)
+  //onOpenEditModal: (order: OrderProps) => void;
+}
 
-export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
-  
-    const navigate = useNavigate(); // ← THÊM DÒNG NÀY
-
+export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps) {
+const navigate = useNavigate();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
 
@@ -43,73 +45,58 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     setOpenPopover(null);
   }, []);
 
-//     // Xử lý khi click chỉnh sửa khách hàng
-//   const handleEditCustomer = useCallback((customerId: string) => {
-//     navigate(`/sweetpaw/user/${customerId}/edit`);
-//   }, [navigate]);
+  const handleViewOrder = useCallback(
+    (order: OrderProps) => {
+      handleClosePopover();
+      navigate(`/sweetpaw/order/${order._id}/view`, { state: order });
+    },
+    [navigate, handleClosePopover]
+  );
 
-    // Xử lý khi click xóa khách hàng
-  // Xử lý khi click xóa khách hàng
-// HÀM NÀY PHẢI NHẬN ID KHÁCH HÀNG CẦN XÓA
-// const handleDeleteCustomer = useCallback(async (customerId: string) => { 
+  const handleUpdateOrder = useCallback(
+    (order: OrderProps) => {
+      handleClosePopover();
+      navigate(`/sweetpaw/order/${order._id}/update`, { state: order });
+    },
+    [navigate, handleClosePopover]
+  );
 
+  // const handleEditDeliveryStatus = useCallback(
+  //   (order: OrderProps) => {
+  //     navigate(`/sweetpaw/order/${order._id}/editDeliveryStatus`, { state: order });
+  //   },
+  //   [navigate]
+  // );
 
-//     if (window.confirm('Bạn có chắc chắn muốn xóa khách hàng này không?')) {
-//         try {
-
-//             //  BƯỚC QUAN TRỌNG: GỌI API XÓA KHÁCH HÀNG
-//             // Bạn cần truyền hàm setLoading từ component cha (UserView) xuống để dùng
-//             // TẠM THỜI: Chỉ dùng API và điều hướng
-            
-//             console.log(`Đang xóa Khách hàng có ID: ${customerId}`);
-//             // await api.delete(`/user/${customerId}`); // Dùng endpoint của USER
-            
-//             // Ví dụ delay để mô phỏng API call
-//             await new Promise(resolve => setTimeout(resolve, 500)); 
-
-//             alert('Khách hàng đã được xóa thành công!');
-            
-//             // Điều hướng về trang danh sách khách hàng (HOẶC TỐT HƠN: Làm mới danh sách)
-//             navigate('/sweetpaw/user'); // Điều hướng về trang danh sách USER
-
-//         } catch (error) {
-//             console.error("Lỗi khi xóa khách hàng:", error);
-//             alert('Có lỗi xảy ra khi xóa khách hàng. Vui lòng thử lại.');
-//         } 
-//         // KHÔNG CÓ finally { setLoading(false); } Ở ĐÂY
-//     }
-// }, [navigate]); // ✅ Dependencies chỉ cần navigate
-
+  // const handleEditPaymentStatus = useCallback(
+  //   (order: OrderProps) => {
+  //     navigate(`/sweetpaw/order/${order._id}/editPaymentStatus`, { state: order });
+  //   },
+  //   [navigate]
+  // );
+ 
   return (
     <>
       <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
-        <TableCell padding="checkbox">
-          <Checkbox disableRipple checked={selected} onChange={onSelectRow} />
-        </TableCell>
-
         <TableCell component="th" scope="row">
-          {row.name}
+          {row._id}
         </TableCell>
-
-        {/* <TableCell>{row.orderDate}</TableCell> */}
-
-        <TableCell>{row.paymentMethod}</TableCell>
-
-        <TableCell sx={{ maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {row.totalSpent?.toLocaleString?.()}₫
-        </TableCell>
-
-        <TableCell align="right">{row.totalSpent?.toLocaleString?.()}₫</TableCell>
-
-
+        <TableCell>{row.HoTen}</TableCell>
+        <TableCell>{row.NgayDat.toLocaleDateString()}</TableCell>
         <TableCell align="right">
+          {row.TongTien ? row.TongTien.toLocaleString() + "₫" : "—"}
+        </TableCell>        
+        <TableCell>{row.paymentMethod}</TableCell>
+        <TableCell>{row.deliveryStatus}</TableCell>
+        <TableCell>{row.paymentStatus}</TableCell>
+        <TableCell align="right" onClick={(e) => e.stopPropagation()}>
           <IconButton onClick={handleOpenPopover}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
       </TableRow>
 
-      <Popover
+        <Popover
         open={!!openPopover}
         anchorEl={openPopover}
         onClose={handleClosePopover}
@@ -121,7 +108,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
           sx={{
             p: 0.5,
             gap: 0.5,
-            width: 140,
+            width: 260,
             display: 'flex',
             flexDirection: 'column',
             [`& .${menuItemClasses.root}`]: {
@@ -132,28 +119,28 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
             },
           }}
         >
-            {/* <MenuItem
-            onClick={() => { // HÀM MŨI TÊN ĐỂ GỌI NHIỀU HÀM
-            handleClosePopover(); // 1. Đóng Popover trước
-            handleEditCustomer(row.id); // 2. Chuyển hướng đến trang sửa (truyền ID khách hàng)
+         <MenuItem
+            onClick={() => {
+              handleClosePopover();
+              handleUpdateOrder(row);
             }}
-            >
-            <Iconify icon="solar:pen-bold" />
-            Chỉnh sửa
-            </MenuItem>
-
-          <MenuItem 
-          onClick={() => {
-            handleClosePopover();
-            handleDeleteCustomer(row.id)
-          }}
-          sx={{ color: 'error.main' }}
           >
-            <Iconify icon="solar:trash-bin-trash-bold" />
-            Xóa
-          </MenuItem> */}
+            <Iconify icon="solar:pen-bold" />
+            Cập nhật trạng thái đơn hàng
+          </MenuItem>
+
+          <MenuItem
+            onClick={() => {
+              handleClosePopover();
+              handleViewOrder(row);
+            }}
+          >
+            <Iconify icon="solar:eye-bold" />
+            Xem chi tiết đơn hàng
+          </MenuItem>
         </MenuList>
       </Popover>
-    </>
-  );
-}
+   
+  </>
+  )
+} 
