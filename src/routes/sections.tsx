@@ -26,10 +26,13 @@ export const UserEditPage = lazy(() => import('src/pages/user-detail'));
 export const OrderPage = lazy(() => import('src/pages/order'));
 export const ProductCreatePage = lazy(() => import('src/sections/product/product-create'));
 export const UserCreatePage = lazy(() => import('src/sections/user/user-create'));
+
 export const OrderDetailPage = lazy(() => import('src/sections/order/order-detail'));
 export const OrderUpdatePage = lazy(() => import('src/sections/order/order-update'));
 
 
+
+export const DiscountPage = lazy(() => import('src/pages/discount'));
 const renderFallback = () => (
   <Box
     sx={{
@@ -76,6 +79,13 @@ export const routesSection: RouteObject[] = [
           { path: 'new/edit', element: <UserCreatePage /> },
         ],
       },
+      { path: 'discount',
+        children: [
+          { index: true, element: <DiscountPage /> },
+          { path: ':id/edit', element: <UserEditPage /> },
+          { path: 'new/edit', element: <UserCreatePage /> },
+        ],
+      },
 
       { path: 'blog', element: <BlogPage /> },
 
@@ -90,6 +100,9 @@ export const routesSection: RouteObject[] = [
         ],
       },
       
+
+      { path: 'order', element: <OrderPage /> },
+    
       {
         path: 'products', // Đường dẫn cha: /products
         children: [

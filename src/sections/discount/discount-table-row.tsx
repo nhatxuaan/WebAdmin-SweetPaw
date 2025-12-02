@@ -9,35 +9,43 @@ import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
+import { Discount } from 'src/model/discount';
+
 import { Iconify } from 'src/components/iconify';
 
-// ---------------------------------
-// TYPE CUSTOMER (KHỚP 100% BACKEND)
-// ---------------------------------
-export interface UserProps {
-  _id: string;
-  HoTen: string;
-  Email: string;
-  SoDienThoai?: string;
-  DiaChi?: Array<{
-    TenDiaChi: string;
-    SoNha: string;
-    TenDuong: string;
-    PhuongXa: string;
-    QuanHuyen: string;
-    ThanhPho: string;
-    MacDinh: boolean;
-  }>;
-  totalSpent?: number;
-}
 
-interface UserTableRowProps {
-  row: UserProps;
+
+
+// export interface DiscountProps {
+//   _id: string;
+//   HoTen: string;
+//   Email: string;
+//   SoDienThoai?: string;
+//   DiaChi?: Array<{
+//     TenDiaChi: string;
+//     SoNha: string;
+//     TenDuong: string;
+//     PhuongXa: string;
+//     QuanHuyen: string;
+//     ThanhPho: string;
+//     MacDinh: boolean;
+//   }>;
+//   totalSpent?: number;
+// }
+
+// interface DiscountTableRowProps {
+//   row: DiscountProps;
+//   selected: boolean;
+//   onSelectRow: () => void;
+// }
+
+interface DiscountTableRowProps {
+  row: Discount;
   selected: boolean;
   onSelectRow: () => void;
 }
 
-export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) {
+export function DiscountTableRow({ row, selected, onSelectRow }: DiscountTableRowProps) {
   const navigate = useNavigate();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(null);
@@ -57,23 +65,26 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
   //   [navigate]
   // );
 
-  const handleEditCustomer = useCallback(
-    (customer: UserProps) => {
-      navigate(`/sweetpaw/user/${customer._id}/edit`, { state: customer });
-    },
-    [navigate]
-  );
+//   const handleEditDiscount = useCallback(
+//     (discount: DiscountProps) => {
+//       navigate(`/sweetpaw/discount/${discount._id}/edit`, { state: discount });
+//     },
+//     [navigate]
+//   );
 
+  const handleEditDiscount = useCallback(() => {
+    navigate(`/sweetpaw/discount/${row._id}/edit`, { state: row });
+  }, [navigate, row]);
 
-  const handleDeleteCustomer = useCallback(
-    async (customerId: string) => {
-      if (!window.confirm('Bạn có chắc chắn muốn xóa khách hàng này không?')) return;
+  const handleDeleteDiscount = useCallback(
+    async () => {
+      if (!window.confirm('Bạn có chắc chắn muốn xóa khuyến mãi này không?')) return;
 
       try {
-        console.log("Deleting...", customerId);
+        //console.log("Deleting...", discountId);
         await new Promise((resolve) => setTimeout(resolve, 300));
-        alert("Đã xóa khách hàng!");
-        navigate('/sweetpaw/user');
+        alert("Đã xóa khuyến mãi!");
+        navigate('/sweetpaw/discount');
       } catch (error) {
         console.error("Delete failed:", error);
         alert("Có lỗi xảy ra, vui lòng thử lại!");
@@ -82,18 +93,7 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     [navigate]
   );
 
-  // -------------------------
-  // TÍNH ĐỊA CHỈ MẶC ĐỊNH
-  // -------------------------
-  let defaultAddress = "Chưa có";
 
-  if (row.DiaChi?.length) {
-    const addr = row.DiaChi.find((a) => a.MacDinh) ?? row.DiaChi[0];
-
-    if (addr) {
-      defaultAddress = `${addr.SoNha} ${addr.TenDuong}, ${addr.PhuongXa}, ${addr.QuanHuyen}, ${addr.ThanhPho}`;
-    }
-  }
 
   return (
     <>
@@ -103,19 +103,23 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
         </TableCell>
 
         <TableCell component="th" scope="row">
-          {row.HoTen}
+          {row.code}
         </TableCell>
 
-        <TableCell>{row.Email}</TableCell>
+        <TableCell>{row.name}</TableCell>
 
-        <TableCell>{row.SoDienThoai || "—"}</TableCell>
+        <TableCell>{row.type}</TableCell>
 
-        <TableCell sx={{ maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          {defaultAddress}
-        </TableCell>
-
-        <TableCell align="right">
-          {row.totalSpent ? row.totalSpent.toLocaleString() + "₫" : "—"}
+        <TableCell> {row.value + "₫"} </TableCell>
+        <TableCell>{row.quantity} </TableCell>
+        <TableCell>{row.startDate} </TableCell>
+        <TableCell>{row.endDate} </TableCell>
+        <TableCell align="right"> 
+            {row.isActive ? (
+            <span style={{ color: "#22c55e", fontWeight: 600 }}>Hoạt động</span>
+            ) : (
+                <span style={{ color: "#ef4444", fontWeight: 600 }}>Ngừng</span>
+            )} 
         </TableCell>
 
         <TableCell align="right">
@@ -152,7 +156,8 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
             onClick={() => {
               handleClosePopover();
               //handleEditCustomer(row._id);
-              handleEditCustomer(row);
+              //handleEditDiscount(row);
+              handleEditDiscount();
             }}
           >
             <Iconify icon="solar:pen-bold" />
@@ -162,7 +167,8 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
           <MenuItem
             onClick={() => {
               handleClosePopover();
-             // handleDeleteCustomer(row._id);
+             // handleDeleteDiscount(row._id);
+              handleDeleteDiscount();
             }}
             sx={{ color: 'error.main' }}
           >

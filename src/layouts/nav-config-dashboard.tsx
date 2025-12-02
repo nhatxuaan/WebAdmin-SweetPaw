@@ -27,16 +27,16 @@ export const navData = [
     title: 'Sản phẩm',
     path: '/sweetpaw/products',
     icon: icon('ic-cart'),
-    // info: (
-    //   <Label color="error" variant="inverted">
-    //     +3
-    //   </Label>
-    // ),
   },
   {
     title: 'Đơn hàng',
     path: '/sweetpaw/order',
     icon: icon('ic-order'),
+  },
+   {
+    title: 'Khuyến mãi',
+    path: '/sweetpaw/discount',
+    icon: icon('ic-discount'),
   },
   {
     title: 'Tin nhắn',
