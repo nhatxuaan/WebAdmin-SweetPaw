@@ -121,9 +121,9 @@ export function SignInView() {
           input: {
             endAdornment: (
               <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                {/* <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
                   <Iconify icon={showPassword ? "solar:eye-bold" : "solar:eye-closed-bold"} />
-                </IconButton>
+                </IconButton> */}
               </InputAdornment>
             ),
           },
