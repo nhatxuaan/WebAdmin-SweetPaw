@@ -13,7 +13,8 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 
-import { apiPostAuth } from "src/services/apiClient";
+import { apiPostAuth } from "src/services/apiClient"; 
+import { apiCreateUsers } from "src/services/userApi";
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
@@ -82,6 +83,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     console.log("Gửi lên backend:", payload);
 
     await apiPostAuth("/api/admin/customers", payload);
+    //await apiCreateUsers("/api/admin/customers", payload);
 
     navigate("/sweetpaw/user");
 

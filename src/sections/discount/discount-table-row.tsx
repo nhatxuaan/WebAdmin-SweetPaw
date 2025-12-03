@@ -10,34 +10,12 @@ import IconButton from '@mui/material/IconButton';
 import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { Discount } from 'src/model/discount';
+import { apiDeletePromotion } from 'src/services/discountApi';
 
 import { Iconify } from 'src/components/iconify';
 
 
 
-
-// export interface DiscountProps {
-//   _id: string;
-//   HoTen: string;
-//   Email: string;
-//   SoDienThoai?: string;
-//   DiaChi?: Array<{
-//     TenDiaChi: string;
-//     SoNha: string;
-//     TenDuong: string;
-//     PhuongXa: string;
-//     QuanHuyen: string;
-//     ThanhPho: string;
-//     MacDinh: boolean;
-//   }>;
-//   totalSpent?: number;
-// }
-
-// interface DiscountTableRowProps {
-//   row: DiscountProps;
-//   selected: boolean;
-//   onSelectRow: () => void;
-// }
 
 interface DiscountTableRowProps {
   row: Discount;
@@ -58,40 +36,64 @@ export function DiscountTableRow({ row, selected, onSelectRow }: DiscountTableRo
     setOpenPopover(null);
   }, []);
 
-  // const handleEditCustomer = useCallback(
-  //   (customerId: string) => {
-  //     navigate(`/sweetpaw/user/${customerId}/edit`);
-  //   },
-  //   [navigate]
-  // );
 
-//   const handleEditDiscount = useCallback(
-//     (discount: DiscountProps) => {
-//       navigate(`/sweetpaw/discount/${discount._id}/edit`, { state: discount });
-//     },
-//     [navigate]
-//   );
 
   const handleEditDiscount = useCallback(() => {
     navigate(`/sweetpaw/discount/${row._id}/edit`, { state: row });
   }, [navigate, row]);
 
-  const handleDeleteDiscount = useCallback(
-    async () => {
-      if (!window.confirm('Bạn có chắc chắn muốn xóa khuyến mãi này không?')) return;
+  // const handleDeleteDiscount = useCallback(
+  //   async () => {
+  //   if (!window.confirm('Bạn có chắc chắn muốn xóa khuyến mãi này không?')) return;
 
-      try {
-        //console.log("Deleting...", discountId);
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        alert("Đã xóa khuyến mãi!");
-        navigate('/sweetpaw/discount');
-      } catch (error) {
-        console.error("Delete failed:", error);
-        alert("Có lỗi xảy ra, vui lòng thử lại!");
-      }
-    },
-    [navigate]
-  );
+  //   try {
+  //     const res = await apiDeletePromotion(row._id);
+
+  //     alert(res.message || "Xóa thành công!");
+  //     navigate('/sweetpaw/discount');
+      
+  //   } catch (error) {
+  //     console.error("Delete failed:", error);
+  //     alert("Có lỗi xảy ra, vui lòng thử lại!");
+  //   }
+  // },
+  // [navigate, row._id]
+  // );
+  const handleDeleteDiscount = useCallback(
+  async () => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa khuyến mãi này không?')) return;
+
+    try {
+      const res = await apiDeletePromotion(row._id);
+
+      alert(res?.message || "Đã xoá thành công");
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Delete failed:", error);
+
+      // BE gửi message trong error.response.data.message
+      const msg =
+        error?.response?.data?.message ||
+        "Có lỗi xảy ra, vui lòng thử lại!";
+
+      alert(msg);
+    }
+  },
+  [navigate, row._id]
+);
+
+
+
+function formatDate(dateString: string) {
+  // bỏ Z để tránh chuyển về UTC/local
+  const clean = dateString.replace("Z", "");
+
+  const [datePart, timePart] = clean.split("T");
+  const [year, month, day] = datePart.split("-");
+  const [hour, minute] = timePart.split(":");
+
+  return `${day}/${month}/${year} ${hour}:${minute}`;
+}
 
 
 
@@ -109,16 +111,15 @@ export function DiscountTableRow({ row, selected, onSelectRow }: DiscountTableRo
         <TableCell>{row.name}</TableCell>
 
         <TableCell>{row.type}</TableCell>
-
-        <TableCell> {row.value + "₫"} </TableCell>
         <TableCell>{row.quantity} </TableCell>
-        <TableCell>{row.startDate} </TableCell>
-        <TableCell>{row.endDate} </TableCell>
+        <TableCell>{formatDate(row.startDate)}</TableCell>
+        <TableCell>{formatDate(row.endDate)}</TableCell>
+
         <TableCell align="right"> 
             {row.isActive ? (
-            <span style={{ color: "#22c55e", fontWeight: 600 }}>Hoạt động</span>
+            <span style={{ color: "#22c55e", fontWeight: 600 }}>Còn</span>
             ) : (
-                <span style={{ color: "#ef4444", fontWeight: 600 }}>Ngừng</span>
+                <span style={{ color: "#ef4444", fontWeight: 600 }}>Hết hạn</span>
             )} 
         </TableCell>
 
@@ -155,8 +156,6 @@ export function DiscountTableRow({ row, selected, onSelectRow }: DiscountTableRo
           <MenuItem
             onClick={() => {
               handleClosePopover();
-              //handleEditCustomer(row._id);
-              //handleEditDiscount(row);
               handleEditDiscount();
             }}
           >
@@ -167,7 +166,6 @@ export function DiscountTableRow({ row, selected, onSelectRow }: DiscountTableRo
           <MenuItem
             onClick={() => {
               handleClosePopover();
-             // handleDeleteDiscount(row._id);
               handleDeleteDiscount();
             }}
             sx={{ color: 'error.main' }}

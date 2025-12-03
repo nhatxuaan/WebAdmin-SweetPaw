@@ -30,9 +30,10 @@ export const UserCreatePage = lazy(() => import('src/sections/user/user-create')
 export const OrderDetailPage = lazy(() => import('src/sections/order/order-detail'));
 export const OrderUpdatePage = lazy(() => import('src/sections/order/order-update'));
 
-
-
 export const DiscountPage = lazy(() => import('src/pages/discount'));
+export const DiscountCreatePage = lazy(() => import('src/sections/discount/discount-create'));
+export const DiscountEditPage = lazy(() => import('src/sections/discount/discount-edit'));
+
 const renderFallback = () => (
   <Box
     sx={{
@@ -82,8 +83,8 @@ export const routesSection: RouteObject[] = [
       { path: 'discount',
         children: [
           { index: true, element: <DiscountPage /> },
-          { path: ':id/edit', element: <UserEditPage /> },
-          { path: 'new/edit', element: <UserCreatePage /> },
+          { path: ':id/edit', element: <DiscountEditPage /> },
+          { path: 'new/edit', element: <DiscountCreatePage /> },
         ],
       },
 

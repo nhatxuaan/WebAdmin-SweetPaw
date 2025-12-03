@@ -50,12 +50,6 @@ export function UserTableRow({ row, selected, onSelectRow }: UserTableRowProps) 
     setOpenPopover(null);
   }, []);
 
-  // const handleEditCustomer = useCallback(
-  //   (customerId: string) => {
-  //     navigate(`/sweetpaw/user/${customerId}/edit`);
-  //   },
-  //   [navigate]
-  // );
 
   const handleEditCustomer = useCallback(
     (customer: UserProps) => {

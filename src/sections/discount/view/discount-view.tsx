@@ -12,7 +12,7 @@ import TablePagination from '@mui/material/TablePagination';
 
 import { Discount } from 'src/model/discount';
 import { DashboardContent } from 'src/layouts/dashboard';
-import { apiGetDiscounts } from "src/services/discountApi";
+import { apiGetPromotion } from "src/services/discountApi";//apiGetDiscountsPromotion
 
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
@@ -25,14 +25,6 @@ import { DiscountTableToolbar } from '../discount-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
 
-// // DEFINE CUSTOMER TYPE
-// interface Discount {
-//   _id: string;
-//   HoTen: string;
-//   Email: string;
-//   SoDienThoai?: string;
-//   DiaChi?: any[];
-// }
 
 export function DiscountView() {
   const navigate = useNavigate();
@@ -47,8 +39,8 @@ export function DiscountView() {
     useEffect(() => {
     const fetchDiscounts = async () => {
         try {
-            const res = await apiGetDiscounts();     // {status, data}
-            setDiscounts(res.data);
+            const res = await apiGetPromotion();     // {status, data}
+            setDiscounts(res);
         } catch (error: any) {
             alert(error.message || "Lỗi khi tải danh sách khuyến mãi!");
         } finally {
@@ -68,7 +60,7 @@ export function DiscountView() {
 
   const notFound = !dataFiltered.length && !!filterName;
 
-  const handleAddCustomer = useCallback(() => {
+  const handleAddDiscount = useCallback(() => {
     navigate('/sweetpaw/discount/new/edit');
   }, [navigate]);
 
@@ -89,7 +81,7 @@ export function DiscountView() {
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
-          onClick={handleAddCustomer}
+          onClick={handleAddDiscount}
         >
           Thêm khuyến mãi mới
         </Button>
@@ -124,7 +116,6 @@ export function DiscountView() {
                   { id: 'code', label: 'Mã code' },
                   { id: 'name', label: 'Tên khuyến mãi' },
                   { id: 'type', label: 'Loại' },
-                  { id: 'value', label: 'Giảm giá' },
                   { id: 'quantity', label: 'Số lượng' },
                   { id: 'startDate', label: 'Ngày bắt đầu' },
                   { id: 'endDate', label: 'Ngày kết thúc' },
