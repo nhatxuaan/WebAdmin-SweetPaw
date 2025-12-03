@@ -22,7 +22,7 @@ type Props = {
   posts: IPostItem[];
 };
 
-export function BlogView({ posts }: Props) {
+export function MessagesView({ posts }: Props) {
   const [sortBy, setSortBy] = useState('latest');
 
   const handleSort = useCallback((newSort: string) => {

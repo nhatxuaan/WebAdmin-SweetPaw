@@ -16,7 +16,7 @@ import PrivateRoute from './PrivateRoute';
 // ----------------------------------------------------------------------
 
 export const DashboardPage = lazy(() => import('src/pages/dashboard'));
-export const BlogPage = lazy(() => import('src/pages/blog'));
+export const BlogPage = lazy(() => import('src/pages/messages'));
 export const UserPage = lazy(() => import('src/pages/user'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const ProductsPage = lazy(() => import('src/pages/products'));
@@ -29,6 +29,7 @@ export const UserCreatePage = lazy(() => import('src/sections/user/user-create')
 
 export const OrderDetailPage = lazy(() => import('src/sections/order/order-detail'));
 export const OrderUpdatePage = lazy(() => import('src/sections/order/order-update'));
+export const MessagesPage = lazy(() => import('src/pages/messages'));
 
 export const DiscountPage = lazy(() => import('src/pages/discount'));
 export const DiscountCreatePage = lazy(() => import('src/sections/discount/discount-create'));
@@ -88,7 +89,7 @@ export const routesSection: RouteObject[] = [
         ],
       },
 
-      { path: 'blog', element: <BlogPage /> },
+      { path: 'messages', element: <MessagesPage /> },
 
       // Trang Đơn hàng
 

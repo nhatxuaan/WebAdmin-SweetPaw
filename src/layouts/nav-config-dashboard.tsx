@@ -40,8 +40,8 @@ export const navData = [
   },
   {
     title: 'Tin nhắn',
-    path: '/sweetpaw/blog',
-    icon: icon('ic-blog'),
+    path: '/sweetpaw/messages',
+    icon: icon('ic-chat'),
       info: (
       <Label color="error" variant="inverted">
         +3

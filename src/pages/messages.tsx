@@ -1,16 +1,16 @@
 import { _posts } from 'src/_mock';
 import { CONFIG } from 'src/config-global';
 
-import { BlogView } from 'src/sections/blog/view';
+import { MessagesView } from 'src/sections/blog/view';
 
 // ----------------------------------------------------------------------
 
 export default function Page() {
   return (
     <>
-      <title>{`Blog - ${CONFIG.appName}`}</title>
+      <title>{`Tin nhắn - ${CONFIG.appName}`}</title>
 
-      <BlogView posts={_posts} />
+      <MessagesView posts={_posts} />
     </>
   );
 }
