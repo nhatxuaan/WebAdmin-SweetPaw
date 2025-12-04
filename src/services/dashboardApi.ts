@@ -7,3 +7,4 @@ export async function getDashboard(type: "day" | "month" | "year" = "year") {
   const res = await apiGetAuth(url);
   return res.data; 
 }
+

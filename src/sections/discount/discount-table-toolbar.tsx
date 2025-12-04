@@ -48,7 +48,7 @@ export function DiscountTableToolbar({ numSelected, filterName, onFilterName }: 
         />
       )}
 
-      {numSelected > 0 ? (
+      {/* {numSelected > 0 ? (
         <Tooltip title="Delete">
           <IconButton>
             <Iconify icon="solar:trash-bin-trash-bold" />
@@ -60,7 +60,7 @@ export function DiscountTableToolbar({ numSelected, filterName, onFilterName }: 
             <Iconify icon="ic:round-filter-list" />
           </IconButton>
         </Tooltip>
-      )}
+      )} */}
     </Toolbar>
   );
 }

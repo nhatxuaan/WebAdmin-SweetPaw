@@ -75,8 +75,8 @@ const navigate = useNavigate();
         <TableCell align="right">
           {row.total_price ? row.total_price.toLocaleString('vi-VN') + '₫' : '—'}
         </TableCell>        
-        <TableCell>{row.payment_method}</TableCell>
         <TableCell>{row.status}</TableCell>
+        <TableCell>{row.payment_method}</TableCell>
         <TableCell>{row.paymentStatus === "PENDING"? (
             <span style={{ color: "#ef4444", fontWeight: 600 }}>Chưa thanh toán</span>
             ) : (

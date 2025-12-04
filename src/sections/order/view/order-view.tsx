@@ -168,7 +168,7 @@ export function OrderView() {
           count={orders.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
-          rowsPerPageOptions={[50, 100, 150]}
+          rowsPerPageOptions={[100, 200, 300]}
           onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
@@ -182,7 +182,7 @@ export function OrderView() {
 export function useTable() {
   const [page, setPage] = useState(0);
    const [orderBy, setOrderBy] = useState('createdAt'); // default sort
-  const [rowsPerPage, setRowsPerPage] = useState(50);
+  const [rowsPerPage, setRowsPerPage] = useState(100);
   const [selected, setSelected] = useState<string[]>([]);
    const [order, setOrder] = useState<'asc' | 'desc'>('desc');
 

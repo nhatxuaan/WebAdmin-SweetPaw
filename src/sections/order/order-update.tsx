@@ -22,7 +22,7 @@ import Breadcrumbs from '@mui/material/Breadcrumbs';
 import TableContainer from '@mui/material/TableContainer';
 
 import { DashboardContent } from 'src/layouts/dashboard';
-// import { apiUpdateOrder, apiDeleteOrder } from 'src/services/orderApi';
+import { apiUpdateStatusPayment } from 'src/services/orderApi';
 
 // ----------------------------------------------------------------------
 
@@ -41,17 +41,7 @@ const PAYMENT_STATUS_OPTIONS = [
   { value: 'PENDING', label: 'Chưa thanh toán' },
   { value: 'SUCCESS', label: 'Đã thanh toán thành công' },
 ];
-// const mockOrderItems = [
-//     { name: 'Bánh kem mocha trái cây', quantity: 1, price: 400000 },
-//     { name: 'Cà phê mocha', quantity: 1, price: 55000 },
-//     { name: 'Bánh mocha cổ điển', quantity: 2, price: 50000 },
-// ];
 
-// const mockTotals = {
-//     shipping: 30000,
-//     discount: 20000,
-//     finalTotal: 555000,
-// };
 // Hàm định dạng tiền tệ
 const formatCurrency = (amount: number | string) => {
     // Đảm bảo amount là số và định dạng sang tiền tệ Việt Nam
@@ -155,7 +145,19 @@ export default function OrdertUpdateView() {
   const handleUpdate = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setLoading(true);  
-    navigate("/sweetpaw/order");
+
+    try {
+      await apiUpdateStatusPayment(formData._id, {paymentStatus: formData.paymentStatus});
+
+     // alert("Cập nhật đơn hàng thành công");
+      navigate("/sweetpaw/order");
+
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi cập nhật đơn hàng");
+    }
+
+    setLoading(false);
 }
 
 
@@ -273,7 +275,7 @@ export default function OrdertUpdateView() {
                       name="status"
                       label="Trạng thái giao hàng"
                       value={formData.status}
-                      onChange={handleChange}
+                      InputProps={{ readOnly: true }}
                     >
                       {DELIVERY_STATUS_OPTIONS.map((option) => (
                         <MenuItem key={option.value} value={option.value}>
