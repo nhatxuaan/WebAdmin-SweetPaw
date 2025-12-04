@@ -1,8 +1,13 @@
 import type { Dayjs } from 'dayjs';
 
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import duration from 'dayjs/plugin/duration';
+import timezone from 'dayjs/plugin/timezone';
 import relativeTime from 'dayjs/plugin/relativeTime';
+
+
+
 
 // ----------------------------------------------------------------------
 
@@ -30,6 +35,9 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("Asia/Ho_Chi_Minh");
 
 // ----------------------------------------------------------------------
 
@@ -65,6 +73,8 @@ export function fDateTime(date: DatePickerFormat, template?: string): string {
   return dayjs(date).format(template ?? formatPatterns.dateTime);
 }
 
+
+
 // ----------------------------------------------------------------------
 
 /**
@@ -78,6 +88,7 @@ export function fDate(date: DatePickerFormat, template?: string): string {
   return dayjs(date).format(template ?? formatPatterns.date);
 }
 
+
 // ----------------------------------------------------------------------
 
 /**
@@ -90,3 +101,6 @@ export function fToNow(date: DatePickerFormat): string {
 
   return dayjs(date).toNow(true);
 }
+
+
+

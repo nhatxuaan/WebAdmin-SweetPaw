@@ -36,7 +36,7 @@ export function AnalyticsWebsiteVisits({ title, subheader, chart, sx, ...other }
     stroke: { width: 2, colors: ['transparent'] },
     xaxis: { categories: chart.categories },
     legend: { show: true },
-    tooltip: { y: { formatter: (value: number) => `${value} visits` } },
+    tooltip: { y: { formatter: (value: number) => `${value}` } },
     ...chart.options,
   });
 
@@ -53,7 +53,7 @@ export function AnalyticsWebsiteVisits({ title, subheader, chart, sx, ...other }
           pl: 1,
           py: 2.5,
           pr: 2.5,
-          height: 364,
+          height: 434,
         }}
       />
     </Card>

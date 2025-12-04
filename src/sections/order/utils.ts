@@ -1,4 +1,6 @@
-import type { OrderProps } from './order-table-row';
+//import type { OrderProps } from './order-table-row';
+import type { Order } from "src/model/order";
+
 
 // ----------------------------------------------------------------------
 
@@ -53,7 +55,7 @@ export function getComparator<Key extends keyof any>(
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  inputData: OrderProps[];
+  inputData: Order[];
   filterName: string;
   comparator: (a: any, b: any) => number;
 };
@@ -71,7 +73,7 @@ export function applyFilter({ inputData, comparator, filterName }: ApplyFilterPr
 
   if (filterName) {
     inputData = inputData.filter(
-      (user) => user.HoTen.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (user) => user.ghn_order_code.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
     );
   }
 

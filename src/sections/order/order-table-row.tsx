@@ -1,3 +1,4 @@
+import type { Order } from "src/model/order";
 
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -12,25 +13,12 @@ import MenuItem, { menuItemClasses } from '@mui/material/MenuItem';
 
 import { Iconify } from 'src/components/iconify';
 
-
-export interface OrderProps {
-  _id: string;
-  HoTen: string;
-  NgayDat: Date;
-  TongTien: number;
-  paymentMethod: string;
-  deliveryStatus: string;
-  paymentStatus: string;
-}
-
 interface OrderTableRowProps {
-  row: OrderProps;
+  row: Order;
   selected: boolean;
-  //Xem chi tiết đơn hàng
   onSelectRow: () => void;
-  //Cập nhật đơn hàng (trạng thái giao hàng, trạng thái thanh toán)
-  //onOpenEditModal: (order: OrderProps) => void;
 }
+
 
 export function OrderTableRow({ row, selected, onSelectRow }: OrderTableRowProps) {
 const navigate = useNavigate();
@@ -46,19 +34,20 @@ const navigate = useNavigate();
   }, []);
 
   const handleViewOrder = useCallback(
-    (order: OrderProps) => {
+    () => {
       handleClosePopover();
-      navigate(`/sweetpaw/order/${order._id}/view`, { state: order });
+      navigate(`/sweetpaw/order/${row._id}/view`, { state: row });
     },
-    [navigate, handleClosePopover]
+    [navigate,row, handleClosePopover]
   );
+ 
 
   const handleUpdateOrder = useCallback(
-    (order: OrderProps) => {
+    () => {
       handleClosePopover();
-      navigate(`/sweetpaw/order/${order._id}/update`, { state: order });
+      navigate(`/sweetpaw/order/${row._id}/update`, { state: row });
     },
-    [navigate, handleClosePopover]
+    [navigate, row, handleClosePopover]
   );
 
   // const handleEditDeliveryStatus = useCallback(
@@ -79,16 +68,22 @@ const navigate = useNavigate();
     <>
       <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
         <TableCell component="th" scope="row">
-          {row._id}
+          {row.ghn_order_code}
         </TableCell>
-        <TableCell>{row.HoTen}</TableCell>
-        <TableCell>{row.NgayDat.toLocaleDateString()}</TableCell>
+        <TableCell>{row.to_name}</TableCell>
+        <TableCell>{new Date(row.createdAt).toLocaleString("vi-VN")}</TableCell>
         <TableCell align="right">
-          {row.TongTien ? row.TongTien.toLocaleString() + "₫" : "—"}
+          {row.total_price ? row.total_price.toLocaleString('vi-VN') + '₫' : '—'}
         </TableCell>        
-        <TableCell>{row.paymentMethod}</TableCell>
-        <TableCell>{row.deliveryStatus}</TableCell>
-        <TableCell>{row.paymentStatus}</TableCell>
+        <TableCell>{row.payment_method}</TableCell>
+        <TableCell>{row.status}</TableCell>
+        <TableCell>{row.paymentStatus === "PENDING"? (
+            <span style={{ color: "#ef4444", fontWeight: 600 }}>Chưa thanh toán</span>
+            ) : (
+                <span style={{ color: "#22c55e", fontWeight: 600 }}>Đã thanh toán</span>
+            )} </TableCell>
+        
+
         <TableCell align="right" onClick={(e) => e.stopPropagation()}>
           <IconButton onClick={handleOpenPopover}>
             <Iconify icon="eva:more-vertical-fill" />
@@ -122,7 +117,7 @@ const navigate = useNavigate();
          <MenuItem
             onClick={() => {
               handleClosePopover();
-              handleUpdateOrder(row);
+              handleUpdateOrder();
             }}
           >
             <Iconify icon="solar:pen-bold" />
@@ -132,7 +127,7 @@ const navigate = useNavigate();
           <MenuItem
             onClick={() => {
               handleClosePopover();
-              handleViewOrder(row);
+              handleViewOrder();
             }}
           >
             <Iconify icon="solar:eye-bold" />

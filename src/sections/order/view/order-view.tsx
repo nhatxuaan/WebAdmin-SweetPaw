@@ -10,7 +10,8 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { apiGetAuth } from 'src/services/apiClient';
+import { Order } from "src/model/order";
+import { apiGetOrders } from "src/services/orderApi";
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Iconify } from 'src/components/iconify';
@@ -20,42 +21,44 @@ import { TableNoData } from '../table-no-data';
 import { OrderTableRow } from '../order-table-row';
 import { OrderTableHead } from '../order-table-head';
 import { TableEmptyRows } from '../table-empty-rows';
-//import { OrderTableToolbar } from '../order-table-toolbar';
+import { OrderTableToolbar } from '../order-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
 
+
+
 // DEFINE ORDER TYPE
-interface Order {
-  _id: string;
-  HoTen: string;
-  NgayDat: Date;
-  TongTien: number;
-  paymentMethod: string;
-  deliveryStatus: string;
-  paymentStatus: string;
-}
+// interface Order_ex{
+//   _id: string;
+//   HoTen: string;
+//   NgayDat: Date;
+//   TongTien: number;
+//   paymentMethod: string;
+//   deliveryStatus: string;
+//   paymentStatus: string;
+// }
 
 export function OrderView() {
   const navigate = useNavigate();
   const table = useTable();
 
   const [filterName, setFilterName] = useState('');
+  const [orders, setOrders] = useState<Order[]>([]);
 
-  //Dữ liệu giả tạm thời để xem cái giao diện 
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      _id: 'TEST',
-      HoTen: 'Ngô Nhật Xuân',
-      NgayDat: new Date ('2/12/2025'),
-      TongTien: 50000,
-      paymentMethod: 'Tiền mặt',
-      deliveryStatus: 'Đang chuẩn bị',
-      paymentStatus: 'Đã thanh toán',
-    },
+  const notFound = !orders.length && !!filterName;
 
-  ]);
-  const dataFiltered = orders;
-  const notFound = !dataFiltered.length && !!filterName;
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const data = await apiGetOrders();
+        setOrders(data);
+      } catch (err) {
+        console.error("Load orders failed:", err);
+      }
+    };
+
+    fetchOrders();
+  }, []);
 
   //  GET DATA FROM BACKEND
   // useEffect(() => {
@@ -73,11 +76,11 @@ export function OrderView() {
   // }, []);
 
   // // FILTER DATA
-  // const dataFiltered = applyFilter({
-  //   inputData: customers,
-  //   comparator: getComparator(table.order, table.orderBy),
-  //   filterName,
-  // });
+  const dataFiltered = applyFilter({
+    inputData: orders,
+    comparator: getComparator(table.order, table.orderBy),
+    filterName,
+  });
 
   // const notFound = !dataFiltered.length && !!filterName;
 
@@ -99,7 +102,19 @@ export function OrderView() {
         </Typography>
       </Box>
 
+      
+
       <Card>
+
+        <OrderTableToolbar
+                  numSelected={table.selected.length}
+                  filterName={filterName}
+                  onFilterName={(event) => {
+                    setFilterName(event.target.value);
+                    table.onResetPage();
+                  }}
+        />
+
         <Scrollbar>
           <TableContainer sx={{ overflow: 'unset' }}>
             <Table sx={{ minWidth: 800 }}>
@@ -112,15 +127,15 @@ export function OrderView() {
                 headLabel={[
                   { id: '_id', label: 'Mã đơn hàng' },
                   { id: 'HoTen', label: 'Họ tên khách' },
-                  { id: 'NgayDat', label: 'Ngày đặt' },
+                  { id: 'createdAt', label: 'Ngày đặt' },
                   { id: 'TongTien', label: 'Tổng Tiền', align: 'right'},
-                  { id: 'paymentMethod', label: 'Phương thức thanh toán' },
                   { id: 'deliveryStatus', label: 'Trạng thái giao hàng' },
+                  { id: 'paymentMethod', label: 'Phương thức thanh toán' },
                   { id: 'paymentStatus', label: 'Trạng thái thanh toán'},
                   { id: '', width: 60 },
                 ]}
               />
-
+               
                <TableBody>
                 {dataFiltered
                   .slice(
@@ -153,7 +168,7 @@ export function OrderView() {
           count={orders.length}
           rowsPerPage={table.rowsPerPage}
           onPageChange={table.onChangePage}
-          rowsPerPageOptions={[5, 10, 25]}
+          rowsPerPageOptions={[50, 100, 150]}
           onRowsPerPageChange={table.onChangeRowsPerPage}
         />
       </Card>
@@ -166,10 +181,10 @@ export function OrderView() {
 
 export function useTable() {
   const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState('HoTen'); // default sort
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+   const [orderBy, setOrderBy] = useState('createdAt'); // default sort
+  const [rowsPerPage, setRowsPerPage] = useState(50);
   const [selected, setSelected] = useState<string[]>([]);
-  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
 
   const onSort = useCallback(
     (id: string) => {

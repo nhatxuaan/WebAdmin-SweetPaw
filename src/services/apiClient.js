@@ -18,27 +18,7 @@ export async function apiPost(path, body) {
   return res.json();
 }
 
-// Hàm POST có token (dành cho admin)
-// export async function apiPostAuth(path, body) {
-//   const token = localStorage.getItem('adminToken');
-//   console.log('Token gửi lên:', token);
 
-//   const res = await fetch(`${API_URL}${path}`, {
-//     method: 'POST',
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//       'Content-Type': 'application/json',
-//     },
-//     body: JSON.stringify(body),
-//   });
-
-//   if (!res.ok) {
-//     const errText = await res.text();
-//     throw new Error(`API ${path} lỗi: ${res.status} – ${errText}`);
-//   }
-
-//   return res.json();
-// }
 
 export async function apiPostAuthNonContent(path, body) {
   const token = localStorage.getItem("adminToken");

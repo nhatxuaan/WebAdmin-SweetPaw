@@ -1,3 +1,5 @@
+import type { Order } from "src/model/order"; 
+
 import { useLocation } from "react-router-dom";
 import React, { useState, useEffect } from 'react'; // Đã loại bỏ useCallback, useMemo không dùng
 import { useParams, useNavigate } from 'react-router-dom';
@@ -25,12 +27,12 @@ import { DashboardContent } from 'src/layouts/dashboard';
 // ----------------------------------------------------------------------
 
 const PAYMENT_METHOD_OPTIONS = [
-  { value: 'Tiền mặt', label: 'Tiền mặt' },
+  { value: 'Thanh toán khi nhận hàng', label: 'Thanh toán khi nhận hàng' },
   { value: 'Chuyển khoản', label: 'Chuyển khoản' },
 ];
 
 const DELIVERY_STATUS_OPTIONS = [
-  { value: 'Đang xử lí', label: 'Đang xử lí' },
+  { value: 'Đang xử lý', label: 'Đang xử lý' },
   { value: 'Đang giao hàng', label: 'Đang giao hàng' },
   { value: 'Đã giao thành công', label: 'Đã giao thành công' },
 ];
@@ -39,17 +41,17 @@ const PAYMENT_STATUS_OPTIONS = [
   { value: 'PENDING', label: 'Chưa thanh toán' },
   { value: 'SUCCESS', label: 'Đã thanh toán thành công' },
 ];
-const mockOrderItems = [
-    { name: 'Bánh kem mocha trái cây', quantity: 1, price: 400000 },
-    { name: 'Cà phê mocha', quantity: 1, price: 55000 },
-    { name: 'Bánh mocha cổ điển', quantity: 2, price: 50000 },
-];
+// const mockOrderItems = [
+//     { name: 'Bánh kem mocha trái cây', quantity: 1, price: 400000 },
+//     { name: 'Cà phê mocha', quantity: 1, price: 55000 },
+//     { name: 'Bánh mocha cổ điển', quantity: 2, price: 50000 },
+// ];
 
-const mockTotals = {
-    shipping: 30000,
-    discount: 20000,
-    finalTotal: 555000,
-};
+// const mockTotals = {
+//     shipping: 30000,
+//     discount: 20000,
+//     finalTotal: 555000,
+// };
 // Hàm định dạng tiền tệ
 const formatCurrency = (amount: number | string) => {
     // Đảm bảo amount là số và định dạng sang tiền tệ Việt Nam
@@ -59,20 +61,27 @@ const formatCurrency = (amount: number | string) => {
 };
 
 // Hàm định dạng ngày tháng
-const formatDate = (dateString: string | Date | undefined): string => {
-    if (!dateString) return '';
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) {
-            return dateString.toString();
-        }
-        return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-    } catch {
-        return dateString.toString();
-    }
+// const formatDate = (dateString: string | Date | undefined): string => {
+//     if (!dateString) return '';
+//     try {
+//         const date = new Date(dateString);
+//         if (isNaN(date.getTime())) {
+//             return dateString.toString();
+//         }
+//         return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+//     } catch {
+//         return dateString.toString();
+//     }
      
+// };
+const formatFullAddress = (
+  address?: string,
+  ward?: string,
+  district?: string,
+  province?: string ) => {
+  const parts = [address, ward, district, province].filter(Boolean);
+  return parts.join(", ");
 };
-
 
 export default function OrdertUpdateView() {
   const { id } = useParams();
@@ -82,24 +91,54 @@ export default function OrdertUpdateView() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     _id: '',
-    HoTen: '',
-    NgayDat: '', 
-    TongTien: '',
-    paymentMethod: '',
-    deliveryStatus: '',
+    to_name: '',
+    to_phone:'',
+    to_address:'',
+    to_ward_name:'',
+    to_district_name:'',
+    to_province_name:'',
+    note: '',
+    ghn_order_code: '',
+    shipping_fee: '',
+    tongtien: '',
+    discountAmount: '',
+    total_price: '',
+    createdAt: '',
+    payment_method: '',
+    status: '',
     paymentStatus: '',
+    items: [] as Order['items'],
+    full_address: '',
   });
 
   useEffect(() => {
     if (order) {
       setFormData({
         _id: order._id || '',
-        HoTen: order.HoTen || '',
-        NgayDat: formatDate(order.NgayDat),
-        TongTien: order.TongTien ? order.TongTien.toString() : '',
-        paymentMethod: order.paymentMethod || PAYMENT_METHOD_OPTIONS[0].value,
-        deliveryStatus: order.deliveryStatus || DELIVERY_STATUS_OPTIONS[0].value,
-        paymentStatus: order.paymentStatus || PAYMENT_STATUS_OPTIONS[0].value,
+        to_name: order.to_name || '',
+        to_phone:order.to_phone || '',
+        to_address:order.to_address || '',
+        to_ward_name:order.to_ward_name || '',
+        to_district_name:order.to_district_name || '',
+        to_province_name: order.to_province_name || '',
+        note: order.note || '',
+        ghn_order_code: order.ghn_order_code || '',
+        shipping_fee: order.shipping_fee.toString() || '',
+        tongtien: order.tongtien.toString() || '',
+        discountAmount: order.discountAmount.toString() || '',
+        total_price: order.total_price.toString() || '',
+        createdAt: order.createdAt || '',
+        payment_method: order.payment_method || '',
+        status: order.status || '',
+        paymentStatus: order.paymentStatus || '',
+        items: order.items || [],
+        
+        full_address: formatFullAddress(
+          order.to_address,
+          order.to_ward_name,
+          order.to_district_name,
+          order.to_province_name
+        ),
       });
     }
   }, [order]);
@@ -164,34 +203,16 @@ export default function OrdertUpdateView() {
               <Stack spacing={3}>
                 <Grid container spacing={3}>
                   
-                  {/*Tên khách hàng */}
+                   {/*Tên khách hàng */}
                   <Grid size={{xs: 12, md: 6}}>
                     <TextField
                       fullWidth
                       required
-                      name="HoTen"
+                      name="to_name"
                       label="Họ tên khách hàng"
-                      value={formData.HoTen}
+                      value={formData.to_name}
                       InputProps={{ readOnly: true }}
                     />
-                  </Grid>
-                   {/*Phương thức thanh toán */}
-                 <Grid size={{xs: 12, md: 6}}>
-                    <TextField
-                      fullWidth
-                      select
-                      required
-                      name="paymentMethod"
-                      label="Phương thức thanh toán"
-                      value={formData.paymentMethod}
-                      onChange={handleChange}
-                    >
-                      {PAYMENT_METHOD_OPTIONS.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </TextField>
                   </Grid>
 
                   {/* Mã đơn hàng */}
@@ -199,21 +220,59 @@ export default function OrdertUpdateView() {
                     <TextField
                       fullWidth
                       required
-                      name="_id"
+                      name="ghn_order_code"
                       label="Mã đơn hàng"
-                      value={formData._id}
+                      value={formData.ghn_order_code}
                       InputProps={{ readOnly: true }}
                     />
                   </Grid>
+
+                  {/*Sdt */}
+                  <Grid size={{xs: 12, md: 6}}>
+                    <TextField
+                      fullWidth
+                      required
+                      name="to_phone"
+                      label="Số điện thoại"
+                      value={formData.to_phone}
+                      InputProps={{ readOnly: true }}
+                    />
+                  </Grid>
+
+                  {/* Ngày đặt */}
+                  <Grid size={{xs: 12, md: 6}}>
+                    <TextField
+                      fullWidth
+                      required
+                      name="createdAt"
+                      label="Ngày đặt"
+                      value={ formData.createdAt ? new Date(formData.createdAt).toLocaleString("vi-VN") : ''}
+                     
+                      InputProps={{ readOnly: true }}
+                    />
+                  </Grid>
+
+                  {/*Ghi chu*/}
+                  <Grid size={{xs: 12, md: 6}}>
+                    <TextField
+                      fullWidth
+                      required
+                      name="note"
+                      label="Ghi chú"
+                      value={formData.note}
+                      InputProps={{ readOnly: true }}
+                    />
+                  </Grid>
+
                    {/* Trạng thái giao hàng */}
                   <Grid size={{xs: 12, md: 6}}>
                     <TextField
                       fullWidth
                       select
                       required
-                      name="deliveryStatus"
+                      name="status"
                       label="Trạng thái giao hàng"
-                      value={formData.deliveryStatus}
+                      value={formData.status}
                       onChange={handleChange}
                     >
                       {DELIVERY_STATUS_OPTIONS.map((option) => (
@@ -223,18 +282,26 @@ export default function OrdertUpdateView() {
                       ))}
                     </TextField>
                   </Grid>
-                  
-                  {/* Tổng tiền */}
+
+                    {/*Phương thức thanh toán */}
                   <Grid size={{xs: 12, md: 6}}>
                     <TextField
                       fullWidth
+                      select
                       required
-                      name="TongTien"
-                      label="Tổng tiền (VNĐ)"
-                      value={formData.TongTien}
+                      name="payment_method"
+                      label="Phương thức thanh toán"
+                      value={formData.payment_method}
                       InputProps={{ readOnly: true }}
-                    />
+                    >
+                      {PAYMENT_METHOD_OPTIONS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                   </Grid>
+
                   {/* Trạng thái thanh toán */}
                   <Grid size={{xs: 12, md: 6}}>
                     <TextField
@@ -254,14 +321,17 @@ export default function OrdertUpdateView() {
                     </TextField>
                   </Grid>
 
-                  {/* Ngày đặt */}
-                  <Grid size={{xs: 12, md: 6}}>
+
+                  {/*Dia chi*/}
+                  <Grid size={{xs: 12, md: 12}}>
                     <TextField
                       fullWidth
                       required
-                      name="NgayDat"
-                      label="Ngày đặt"
-                      value={formData.NgayDat}
+                      multiline
+                      minRows={1}
+                      name="full_address"
+                      label="Địa chỉ"
+                      value={formData.full_address}
                       InputProps={{ readOnly: true }}
                     />
                   </Grid>
@@ -302,7 +372,7 @@ export default function OrdertUpdateView() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {mockOrderItems.map((item, index) => (
+                             {formData.items.map((item, index) => (
                                 <TableRow key={index}>
                                     <TableCell>{item.name}</TableCell>
                                     <TableCell align="center">{item.quantity}</TableCell>
@@ -317,16 +387,20 @@ export default function OrdertUpdateView() {
                 {/* Tổng kết đơn hàng (width 280px) */}
                 <Stack spacing={1} alignItems="flex-end" sx={{ mt: 3, pr: 2 }}>
                     <Stack direction="row" justifyContent="space-between" width={280}>
+                        <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Tổng tiền hàng</Typography>
+                        <Typography variant="body2">{formatCurrency(formData.tongtien)}</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between" width={280}>
                         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Phí vận chuyển</Typography>
-                        <Typography variant="body2">{formatCurrency(mockTotals.shipping)}</Typography>
+                        <Typography variant="body2">{formatCurrency(formData.shipping_fee)}</Typography>
                     </Stack>
                     <Stack direction="row" justifyContent="space-between" width={280}>
                         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Giảm giá</Typography>
-                        <Typography variant="body2" color="error">- {formatCurrency(mockTotals.discount)}</Typography>
+                        <Typography variant="body2" color="error"> {formatCurrency(formData.discountAmount)}</Typography>
                     </Stack>
                     <Stack direction="row" justifyContent="space-between" width={280} sx={{ pt: 1, borderTop: '1px dashed grey' }}>
                         <Typography variant="subtitle1">Tổng tiền</Typography>
-                        <Typography variant="subtitle1" color="primary">{formatCurrency(mockTotals.finalTotal)}</Typography>
+                        <Typography variant="subtitle1" color="primary">{formatCurrency(formData.total_price)}</Typography>
                     </Stack>
                 </Stack>
             </Card>

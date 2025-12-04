@@ -1,4 +1,3 @@
-//import type { DiscountProps } from './discount-table-row';
 import { Discount } from 'src/model/discount';
 
 // ----------------------------------------------------------------------
