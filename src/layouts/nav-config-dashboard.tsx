@@ -42,11 +42,11 @@ export const navData = [
     title: 'Tin nhắn',
     path: '/sweetpaw/messages',
     icon: icon('ic-chat'),
-      info: (
-      <Label color="error" variant="inverted">
-        +3
-      </Label>
-    ),
+    //   info: (
+    //   <Label color="error" variant="inverted">
+    //     +3
+    //   </Label>
+    // ),
   },
   {
     title: 'Sign in',
