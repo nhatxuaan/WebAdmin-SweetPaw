@@ -5,7 +5,7 @@ type IOSocket = ReturnType<typeof io>;
 class SocketAdmin {
     private static instance: IOSocket | null = null;
 
-    static init(baseUrl: string): IOSocket {
+    static init(baseUrl: string, options?: any): IOSocket {
         if (!SocketAdmin.instance) {
             console.log("[SocketAdmin] Khởi tạo kết nối socket admin tới:", baseUrl);
 
@@ -13,6 +13,7 @@ class SocketAdmin {
                 reconnection: true,
                 reconnectionAttempts: Infinity,
                 reconnectionDelay: 1000,
+                ...options
             });
 
             SocketAdmin.instance.on("connect", () => {
@@ -37,12 +38,14 @@ class SocketAdmin {
 
     static joinRoom(adminId: string) {
         console.log("Admin tham gia phòng của mình với ID:", adminId);
-        SocketAdmin.instance?.emit("joinRoom", { userId: adminId, role: "Admin" });
+        const data = {adminId, role: "Admin" };
+        SocketAdmin.instance?.emit("joinRoom", data);
     }
 
     static openChat(userId: string, chatId: string) {
         console.log("Admin mở cuộc chat của user", userId, "với chatId", chatId);
-        SocketAdmin.instance?.emit("openChat", { userId, chatId });
+        const data = { userId: userId, chatId: chatId };
+        SocketAdmin.instance?.emit("openChat", data);
     }
 
     static sendAdminMessage(userId: string, chatId: string, content: string) {
@@ -61,6 +64,13 @@ class SocketAdmin {
     static closeChat(userId: string) {
         console.log("Admin đóng cửa sổ chat của user:", userId);
         SocketAdmin.instance?.emit("closeChat", { userId });
+    }
+    static disconnect() {
+        if (SocketAdmin.instance) {
+            SocketAdmin.instance.disconnect();
+            SocketAdmin.instance = null;
+            console.log("Socket admin đã ngắt kết nối.");
+        }
     }
 }
 

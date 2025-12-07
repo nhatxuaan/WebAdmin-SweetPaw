@@ -31,7 +31,7 @@ export function MessagesView() {
   // ---------- init socket + load chats ----------
   useEffect(() => {
     // init socket
-    const socket = SocketAdmin.init("https://sweetpaw-be.azurewebsites.net/");
+    const socket = SocketAdmin.init("https://sweetpaw-be.azurewebsites.net/", { transports: ["websocket"]});
     socketRef.current = socket;
 
     socket.on("connect", () => {
@@ -124,7 +124,7 @@ export function MessagesView() {
     try {
       const res = await apiGetChatHistory(chat.user?._id || ""); // expected shape: { messages: ChatMessage[] }
       console.log("[API] apiGetChatHistory result:", res);
-      const msgs = (res[0]?.messages || []).map((m: any) => ({
+      const msgs = (res?.data?.messages || []).map((m: any) => ({
         id: m._id,
         text: m.content,
         from: m.senderModel.toLowerCase() === "admin" ? "me" : "user",
