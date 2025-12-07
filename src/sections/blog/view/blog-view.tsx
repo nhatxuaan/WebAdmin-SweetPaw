@@ -3,10 +3,8 @@ import type { ChatItem, ChatMessage as ChatMessageModel, ChatUser } from "src/mo
 import React, { useEffect, useRef, useState } from "react";
 
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
 
 import SocketAdmin from "src/utils/socketAdmin";
 
@@ -126,18 +124,6 @@ export function MessagesView() {
     try {
       const res = await apiGetChatHistory(chat.user?._id || ""); // expected shape: { messages: ChatMessage[] }
       console.log("[API] apiGetChatHistory result:", res);
-      // const data = Array.isArray(res?.data) ? res.data[0] : res?.data || res;
-      // const msgs = data?.messages || res?.messages || [];
-      // console.log("[CHAT] messages to display:", msgs);
-
-      // setMessageList(
-      //   msgs.map((m: any) => ({
-      //     id: m._id || Date.now(), // fallback nếu _id không có
-      //     text: m.content || "",
-      //     from: (m.senderModel || "").toLowerCase() === "admin" ? "me" : "user",
-      //     timestamp: m.timestamp || m.createdAt || new Date().toISOString(),
-      //   }))
-      // );
       const msgs = (res[0]?.messages || []).map((m: any) => ({
         id: m._id,
         text: m.content,
@@ -260,7 +246,7 @@ export function MessagesView() {
 
   return (
     <DashboardChatContent>
-      <Box sx={{ mt: 2, flex: 1, overflowY: "auto", pr: 1, display: "flex", gap: 2 }}>
+      <Box sx={{ mt: 2, flex: 1, overflowY: "auto", pr: 1, display: "flex", gap: 2,  height: "calc(100vh - 16px)", }}>
         {/* SIDEBAR */}
         <Box sx={{ width: "28%", background: "white", borderRadius: 2, p: 2, display: "flex", flexDirection: "column", boxShadow: "0 2px 6px rgba(0,0,0,0.08)" }}>
           <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 2 }}>TIN NHẮN</Typography>
