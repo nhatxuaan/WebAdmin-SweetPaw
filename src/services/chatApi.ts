@@ -9,3 +9,11 @@ export function apiGetAllChats() {
 export function apiGetChatHistory(userId: string) {
   return apiGetAuth(`/api/admin/messages/${userId}`);
 }
+
+export function apiSendMessage(userId: string, content: string, media: any[] = []) {
+  return apiPostAuth("/api/admin/messages", {
+    userId,
+    content,
+    media,
+  });
+}

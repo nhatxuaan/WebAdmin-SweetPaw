@@ -10,7 +10,7 @@ export default function Page() {
     <>
       <title>{`Tin nhắn - ${CONFIG.appName}`}</title>
 
-      <MessagesView posts={_posts} />
+      <MessagesView />
     </>
   );
 }

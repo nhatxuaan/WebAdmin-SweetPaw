@@ -1,314 +1,338 @@
-// 1. React hooks
-import { useState, useRef, useEffect } from "react";
+import type { ChatItem, ChatMessage as ChatMessageModel, ChatUser } from "src/model/chat";
 
-// 3. MUI
+import React, { useEffect, useRef, useState } from "react";
+
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
 
-// 4. Utils
 import SocketAdmin from "src/utils/socketAdmin";
 
-// 5. Layouts
 import { DashboardChatContent } from "src/layouts/chat/chat-content";
-import { apiGetAllChats, apiGetChatHistory } from "src/services/chatApi";
-
-// 6. Components
-import { ChatBox } from "src/sections/blog/ChatBox";
-
-// 7. Types
-import type { IPostItem } from "../post-item";
+import { apiGetAllChats, apiGetChatHistory, apiSendMessage  } from "src/services/chatApi";
 
 
-
-
-
-type Props = {
-  posts: IPostItem[];
+// Local UI message type (normalized)
+type UiMessage = {
+  id: string | number;
+  text: string;
+  from: "me" | "user";
+  timestamp?: string;
 };
 
-
-export function MessagesView({ posts }: Props) {
-  console.log(" [MessagesView] Component render");
-
-  const [chatList, setChatList] = useState<any[]>([]);
-  const [messageList, setMessageList] = useState<any[]>([]);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+export function MessagesView() {
+  const [chatList, setChatList] = useState<ChatItem[]>([]);
+  const [messageList, setMessageList] = useState<UiMessage[]>([]);
+  const [selectedChat, setSelectedChat] = useState<ChatItem | null>(null);
   const [inputMsg, setInputMsg] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const socketRef = useRef<any>(null);
 
-  // ==========================
-  // INIT SOCKET + LOAD CHATS
-  // ==========================
+  // ---------- init socket + load chats ----------
   useEffect(() => {
-    console.log("[INIT] Khởi tạo socket admin…");
-
-    const socket = SocketAdmin.init(import.meta.env.VITE_SOCKET_URL);
+    // init socket
+    const socket = SocketAdmin.init("https://sweetpaw-be.azurewebsites.net/");
+    socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("[SOCKET] Đã kết nối tới server socket!");
+      console.log("[SOCKET] connected", socket.id);
     });
 
     socket.on("disconnect", () => {
-      console.log("[SOCKET] Mất kết nối tới server socket!");
+      console.log("[SOCKET] disconnected");
     });
 
+    // when user sends message to admin
     socket.on("userMessage", (msg: any) => {
-      console.log("[REALTIME] Có tin nhắn realtime từ user:", msg);
-      if (msg.userId === selectedUser?._id) {
-        console.log("[REALTIME] Tin nhắn thuộc user đang mở → thêm vào UI");
+      // msg expected shape: { chatId?, userId, content, timestamp, ... }
+      console.log("[SOCKET] userMessage", msg);
 
+      // 1) if the message belongs to currently opened chat -> append to messageList
+      if (selectedChat && (msg.chatId === selectedChat._id || msg.userId === selectedChat.user?._id)) {
         setMessageList((prev) => [
           ...prev,
           {
-            id: Date.now(),
+            id: msg._id || Date.now(),
             text: msg.content,
             from: "user",
+            timestamp: msg.timestamp,
           },
         ]);
-      } else {
-        console.log("[REALTIME] Tin nhắn của user KHÁC, không hiển thị");
       }
+
+      // 2) update chatList: set lastMessage and updatedAt (if that chat exists)
+      setChatList((prev) =>
+        prev.map((c) =>
+          c._id === msg.chatId
+            ? { ...c, lastMessage: msg.content, updatedAt: msg.timestamp || new Date().toISOString() }
+            : c
+        )
+      );
     });
 
-    // Load danh sách đoạn chat
-    async function fetchChats() {
-      console.log("[API] Gọi API lấy danh sách chat…");
-
-      try {
-        const res = await apiGetAllChats();
-        console.log("[API] Kết quả apiGetAllChats:", res);
-        setChatList(res?.data || []);
-        console.log("[STATE] chatList đã cập nhật:", res?.data);
-      } catch (err) {
-        console.error("[API] Lỗi gọi apiGetAllChats:", err);
+    // Optionally, adminMessage events (when server broadcast admin message back)
+    socket.on("adminMessage", (msg: any) => {
+      console.log("[SOCKET] adminMessage", msg);
+      // similar handling as above — append if belongs to current open
+      if (selectedChat && (msg.chatId === selectedChat._id || msg.userId === selectedChat.user?._id)) {
+        setMessageList((prev) => [
+          ...prev,
+          {
+            id: msg._id || Date.now(),
+            text: msg.content,
+            from: "me",
+            timestamp: msg.timestamp,
+          },
+        ]);
       }
-    }
 
-    fetchChats();
-  }, []);
-
-  // ==========================
-  //  CLICK USER → LOAD CHAT HISTORY
-  // ==========================
-  const openChat = async (user: any) => {
-    console.log("[OPEN CHAT] Chọn user:", user);
-
-    setSelectedUser(user);
-
-    console.log("[API] Gọi API lấy lịch sử chat của userID:", user._id);
-    try {
-      const res = await apiGetChatHistory(user._id);
-      console.log("[API] Kết quả apiGetChatHistory:", res);
-
-      setMessageList(
-        res?.data?.messages?.map((m: any) => ({
-          id: m._id,
-          text: m.content,
-          from: m.senderModel === "Admin" ? "me" : "user",
-        })) || []
+      setChatList((prev) =>
+        prev.map((c) =>
+          c._id === msg.chatId
+            ? { ...c, lastMessage: msg.content, updatedAt: msg.timestamp || new Date().toISOString() }
+            : c
+        )
       );
+    });
 
-      console.log("[STATE] messageList đã cập nhật");
+    // load chats
+    (async function fetchChats() {
+      try {
+        const res = await apiGetAllChats(); // expected: { data: ChatItem[] } or ChatItem[]
+        const data: ChatItem[] = Array.isArray(res?.data) ? res.data : res?.data || res;
+        setChatList(data || []);
+      } catch (err) {
+        console.error("[API] apiGetAllChats error", err);
+      }
+    })();
+
+    return () => {
+      // cleanup socket listeners
+      socket.off("userMessage");
+      socket.off("adminMessage");
+      socket.disconnect?.();
+      socketRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once
+
+  // ---------- open chat (load history) ----------
+  const openChat = async (chat: ChatItem) => {
+    setSelectedChat(chat);
+    setMessageList([]); // clear while loading
+
+    try {
+      const res = await apiGetChatHistory(chat.user?._id || ""); // expected shape: { messages: ChatMessage[] }
+      console.log("[API] apiGetChatHistory result:", res);
+      // const data = Array.isArray(res?.data) ? res.data[0] : res?.data || res;
+      // const msgs = data?.messages || res?.messages || [];
+      // console.log("[CHAT] messages to display:", msgs);
+
+      // setMessageList(
+      //   msgs.map((m: any) => ({
+      //     id: m._id || Date.now(), // fallback nếu _id không có
+      //     text: m.content || "",
+      //     from: (m.senderModel || "").toLowerCase() === "admin" ? "me" : "user",
+      //     timestamp: m.timestamp || m.createdAt || new Date().toISOString(),
+      //   }))
+      // );
+      const msgs = (res[0]?.messages || []).map((m: any) => ({
+        id: m._id,
+        text: m.content,
+        from: m.senderModel.toLowerCase() === "admin" ? "me" : "user",
+        timestamp: m.timestamp
+      }));
+
+      console.log("[CHAT] messages to display:", msgs);
+
+      setMessageList(msgs);
+
+      // optionally: mark read via API (not implemented here)
     } catch (err) {
-      console.error("[API] Lỗi lấy lịch sử chat:", err);
+      console.error("[API] apiGetChatHistory error", err);
     }
   };
 
-  // Scroll xuống cuối
+  const sendMessage = async () => {
+    if (!selectedChat || !inputMsg.trim()) return;
+    
+    const text = inputMsg.trim();
+    const optimistic: UiMessage = {
+      id: `local-${Date.now()}`,
+      text,
+      from: "me",
+      timestamp: new Date().toISOString(),
+    };
+
+    setMessageList((prev) => [...prev, optimistic]);
+    setInputMsg("");
+
+    // emit socket realtime
+    socketRef.current?.emit("adminMessage", {
+      chatId: selectedChat._id,
+      userId: selectedChat.user?._id,
+      content: text,
+      timestamp: new Date().toISOString(),
+    });
+
+    // gọi API lưu tin nhắn
+    try {
+      const result = await apiSendMessage(selectedChat.user?._id || "", text, []);
+      console.log("Tin nhắn lưu server:", result);
+
+      // cập nhật optimistic message nếu muốn
+      setMessageList((prev) =>
+        prev.map((msg) =>
+          msg.id === optimistic.id
+            ? { ...msg, id: result.data.message._id, timestamp: result.data.message.timestamp }
+            : msg
+        )
+      );
+    } catch (err) {
+      console.error("Lỗi gửi tin nhắn:", err);
+    }
+  };
+
+  // scroll to bottom when messages change
   useEffect(() => {
-    console.log("[SCROLL] Auto scroll to bottom");
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messageList]);
 
-  // ==========================
-  // 3) SEND MESSAGE
-  // ==========================
-  const sendMessage = async () => {
-    console.log("[SEND] Gửi tin nhắn:", inputMsg);
+  // ---------- send message ----------
+  // const sendMessage = async () => {
+  //   const text = inputMsg.trim();
+  //   if (!text || !selectedChat) return;
 
-    if (!inputMsg.trim() || !selectedUser) {
-      console.log("[SEND] Không có user hoặc tin nhắn rỗng");
-      return;
-    }
+  //   // create optimistic message to UI
+  //   const optimistic: UiMessage = {
+  //     id: `local-${Date.now()}`,
+  //     text,
+  //     from: "me",
+  //     timestamp: new Date().toISOString(),
+  //   };
+  //   setMessageList((prev) => [...prev, optimistic]);
+  //   setInputMsg("");
 
-    console.log("[SEND] Tính năng gửi tin nhắn đang bị comment");
+  //   // update chatList lastMessage locally
+  //   setChatList((prev) =>
+  //     prev.map((c) =>
+  //       c._id === selectedChat._id
+  //         ? { ...c, lastMessage: text, updatedAt: new Date().toISOString() }
+  //         : c
+  //     )
+  //   );
+
+  //   // emit via socket (so user receives realtime)
+  //   try {
+  //     socketRef.current?.emit("adminMessage", {
+  //       chatId: selectedChat._id,
+  //       userId: selectedChat.user?._id,
+  //       content: text,
+  //       timestamp: new Date().toISOString(),
+  //     });
+  //   } catch (err) {
+  //     console.warn("Socket emit failed:", err);
+  //   }
+
+  //   // persist to server via REST API if available (best practice)
+  //   // try {
+  //   //   if (typeof apiSendMessage === "function") {
+  //   //     // apiSendMessage(chatId, { content, senderModel })
+  //   //     await apiSendMessage(selectedChat._id, {
+  //   //       content: text,
+  //   //       senderModel: "Admin",
+  //   //     });
+  //   //     // If server returns saved message with _id, you may want to replace optimistic id with real id.
+  //   //   }
+  //   // } catch (err) {
+  //   //   console.error("[API] apiSendMessage error", err);
+  //   //   // optional: show error indicator or revert optimistic message
+  //   // }
+  // };
+
+  // ---------- UI helpers ----------
+  const displayName = (user: ChatUser | null | undefined) => {
+    if (!user) return "Người dùng đã xóa";
+    return user.HoTen || user.displayName || user.username || "Người dùng";
   };
 
   return (
     <DashboardChatContent>
-      <Box
-        sx={{
-          mt: 2,
-          flex: 1,
-          overflowY: "auto",
-          pr: 1,
-          display: "flex",
-          gap: 2,
-        }}
-      >
-        {/* =======================================
-            SIDEBAR USER LIST
-        ======================================= */}
-        <Box
-          sx={{
-            width: "25%",
-            background: "white",
-            borderRadius: 2,
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-          }}
-        >
-          <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 2 }}>
-            TIN NHẮN
-          </Typography>
+      <Box sx={{ mt: 2, flex: 1, overflowY: "auto", pr: 1, display: "flex", gap: 2 }}>
+        {/* SIDEBAR */}
+        <Box sx={{ width: "28%", background: "white", borderRadius: 2, p: 2, display: "flex", flexDirection: "column", boxShadow: "0 2px 6px rgba(0,0,0,0.08)" }}>
+          <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 2 }}>TIN NHẮN</Typography>
 
-          <input
-            placeholder="Tìm kiếm"
-            style={{
-              padding: "10px",
-              borderRadius: "10px",
-              border: "1px solid #ccc",
-            }}
-          />
+          <TextField placeholder="Tìm kiếm" size="small" variant="outlined" sx={{ mb: 2 }} />
 
-          {/* LIST USER CHAT */}
-          <Box
-            sx={{
-              mt: 2,
-              flex: 1,
-              overflowY: "auto",
-              pr: 1,
-              "&::-webkit-scrollbar": { width: "6px" },
-              "&::-webkit-scrollbar-thumb": {
-                background: "#bfbfbf",
-                borderRadius: "8px",
-              },
-            }}
-          >
-            {chatList.length === 0 && (
-              <Typography sx={{ color: "#777", mt: 2 }}>
-                Chưa có cuộc trò chuyện nào
-              </Typography>
-            )}
+          <Box sx={{ mt: 1, flex: 1, overflowY: "auto", pr: 1 }}>
+            {chatList.length === 0 && <Typography sx={{ color: "#777", mt: 2 }}>Chưa có cuộc trò chuyện nào</Typography>}
 
-            {chatList.map((chat) => (
-              <Box
-                key={chat.user._id}
-                onClick={() => openChat(chat.user)}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  p: 1.5,
-                  mb: 1.2,
-                  borderRadius: 2,
-                  cursor: "pointer",
-                  background:
-                    selectedUser?._id === chat.user._id ? "#e8f0fe" : "white",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                  "&:hover": { background: "#f5f7fa" },
-                }}
-              >
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-                    {chat.user.name || "Người dùng"}
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      fontSize: 12,
-                      color: "#666",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {chat.lastMessage || "Chưa có tin nhắn"}
+            {chatList.map((chat) => {
+              const user = chat.user;
+              const isActive = selectedChat?._id === chat._id;
+              return (
+                <Box
+                  key={chat._id}
+                  onClick={() => openChat(chat)}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    p: 1.2,
+                    mb: 1,
+                    borderRadius: 2,
+                    cursor: user ? "pointer" : "not-allowed",
+                    background: isActive ? "#e8f0fe" : "white",
+                    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                    "&:hover": { background: user ? "#f5f7fa" : "white" },
+                  }}
+                >
+                  <Box sx={{ flex: 1 }}>
+                    <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{displayName(user)}</Typography>
+                    <Typography sx={{ fontSize: 12, color: "#666", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {chat.lastMessage || "Chưa có tin nhắn"}
+                    </Typography>
+                  </Box>
+                  <Typography sx={{ fontSize: 11, color: "#999" }}>
+                    {chat.updatedAt ? new Date(chat.updatedAt).toLocaleString() : ""}
                   </Typography>
                 </Box>
-              </Box>
-            ))}
+              );
+            })}
           </Box>
         </Box>
 
-        {/* =======================================
-            CHAT WINDOW
-        ======================================= */}
-        <Box
-          sx={{
-            flex: 1,
-            background: "white",
-            borderRadius: 2,
-            p: 2,
-            display: "flex",
-            flexDirection: "column",
-            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-          }}
-        >
-          {/* HEADER */}
+        {/* CHAT WINDOW */}
+        <Box sx={{ flex: 1, background: "white", borderRadius: 2, p: 2, display: "flex", flexDirection: "column", boxShadow: "0 2px 6px rgba(0,0,0,0.08)" }}>
           <Box sx={{ pb: 1.5, borderBottom: "1px solid #eee" }}>
-            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>
-              {selectedUser ? selectedUser.name : "Chọn một cuộc trò chuyện"}
-            </Typography>
+            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>{selectedChat ? displayName(selectedChat.user) : "Chọn một cuộc trò chuyện"}</Typography>
           </Box>
 
-          {/* CHAT BODY */}
-          <Box
-            sx={{
-              flex: 1,
-              overflowY: "auto",
-              mt: 2,
-              mb: 2,
-              pr: 1,
-              "&::-webkit-scrollbar": { width: "6px" },
-              "&::-webkit-scrollbar-thumb": {
-                background: "#bfbfbf",
-                borderRadius: "8px",
-              },
-            }}
-          >
-            {selectedUser ? (
+          <Box sx={{ flex: 1, overflowY: "auto", mt: 2, mb: 2, pr: 1 }}>
+            {selectedChat ? (
               messageList.map((msg) =>
                 msg.from === "user" ? (
                   <Box key={msg.id} sx={{ display: "flex", gap: 1.5, mb: 2 }}>
-                    <Box sx={{ width: 5, height: 40 }} />
-                    <Box
-                      sx={{
-                        maxWidth: 320,
-                        background: "white",
-                        p: 1.5,
-                        borderRadius: 2,
-                        boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
-                      }}
-                    >
-                      {msg.text}
+                    <Box sx={{ width: 6 }} />
+                    <Box sx={{ maxWidth: 520, background: "white", p: 1.5, borderRadius: 2, boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                      <Typography>{msg.text}</Typography>
+                      {msg.timestamp && <Typography sx={{ fontSize: 11, color: "#999", mt: 0.5 }}>{new Date(msg.timestamp).toLocaleString()}</Typography>}
                     </Box>
                   </Box>
                 ) : (
-                  <Box
-                    key={msg.id}
-                    sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}
-                  >
-                    <Box
-                      sx={{
-                        maxWidth: 320,
-                        background: "#4f8dfd",
-                        color: "white",
-                        p: 1.5,
-                        borderRadius: 2,
-                      }}
-                    >
-                      {msg.text}
+                  <Box key={msg.id} sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+                    <Box sx={{ maxWidth: 520, background: "#4f8dfd", color: "white", p: 1.5, borderRadius: 2 }}>
+                      <Typography>{msg.text}</Typography>
+                      {msg.timestamp && <Typography sx={{ fontSize: 11, color: "#e6f0ff", mt: 0.5 }}>{new Date(msg.timestamp).toLocaleString()}</Typography>}
                     </Box>
                   </Box>
                 )
               )
             ) : (
-              <Typography sx={{ color: "#777", mt: 3 }}>
-                Hãy chọn một người để bắt đầu chat
-              </Typography>
+              <Typography sx={{ color: "#777", mt: 3 }}>Hãy chọn một người để bắt đầu chat</Typography>
             )}
 
             <div ref={chatEndRef} />
@@ -316,39 +340,39 @@ export function MessagesView({ posts }: Props) {
 
           {/* INPUT */}
           <Box sx={{ display: "flex", gap: 2 }}>
-            <input
+            <TextField
               placeholder="Nhập tin nhắn..."
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              disabled={!selectedUser}
-              style={{
-                flex: 1,
-                padding: "12px",
-                borderRadius: "12px",
-                border: "1px solid #ccc",
-                outline: "none",
-                background: selectedUser ? "white" : "#f0f0f0",
-              }}
+              disabled={!selectedChat}
+              fullWidth
+              size="small"
             />
+
+            {/* <IconButton color="primary" disabled={!selectedChat || !inputMsg.trim()} onClick={sendMessage}>
+              <SendIcon />
+            </IconButton> */}
 
             <button
               onClick={sendMessage}
-              disabled={!selectedUser}
               style={{
-                background: selectedUser ? "#4f8dfd" : "#9bbcff",
+                background: "#4f8dfd",
                 color: "white",
                 padding: "12px 20px",
                 borderRadius: "12px",
                 border: "none",
-                cursor: selectedUser ? "pointer" : "not-allowed",
+                cursor: "pointer",
               }}
             >
               Gửi
-            </button>
+          </button>
+
           </Box>
         </Box>
       </Box>
     </DashboardChatContent>
   );
 }
+
+export default MessagesView;
